@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Admin Tasas | Yimmi Kambio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -20,24 +20,52 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
             font-family: 'Outfit', sans-serif;
-            background:
-                radial-gradient(circle at 12% 0%, rgba(124, 58, 237, 0.12), transparent 42%),
-                radial-gradient(circle at 88% 8%, rgba(37, 99, 235, 0.12), transparent 42%),
-                #f1f5f9;
+            background: #e2e8f0;
             color: #0f172a;
-            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
         }
         .font-mono {
             font-family: 'JetBrains Mono', monospace;
             font-variant-numeric: tabular-nums;
         }
+        .apk-shell {
+            width: 100%;
+            max-width: 430px;
+            height: 100vh;
+            height: 100dvh;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 12% 0%, rgba(124, 58, 237, 0.11), transparent 42%),
+                radial-gradient(circle at 88% 8%, rgba(37, 99, 235, 0.11), transparent 42%),
+                #f8fafc;
+            box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08), 0 20px 45px -16px rgba(15, 23, 42, 0.2);
+        }
+        .apk-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 12px 18px 12px;
+        }
+        ::-webkit-scrollbar { width: 3px; height: 3px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #2563eb, #7c3aed);
+            border-radius: 9999px;
+        }
         .admin-surface {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(14px);
+            background: rgba(255, 255, 255, 0.96);
             border: 1px solid rgba(15, 23, 42, 0.08);
-            box-shadow: 0 14px 34px -16px rgba(15, 23, 42, 0.12);
+            box-shadow: 0 8px 22px -12px rgba(15, 23, 42, 0.12);
         }
         .admin-input {
             background: #f8fafc;
@@ -52,79 +80,120 @@
         }
         .btn-grad {
             background: linear-gradient(135deg, #2563eb 0%, #7c3aed 60%, #c026d3 100%);
-            box-shadow: 0 10px 22px -8px rgba(124, 58, 237, 0.45);
+            box-shadow: 0 8px 18px -6px rgba(124, 58, 237, 0.45);
             transition: transform 0.15s ease, filter 0.15s ease;
         }
         .btn-grad:hover {
             filter: brightness(1.05);
-            transform: translateY(-1px);
         }
         .btn-grad:active {
-            transform: scale(0.99);
+            transform: scale(0.98);
+        }
+        .logo-frame {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+        }
+        .logo-frame img {
+            width: 72%;
+            height: 72%;
+            object-fit: contain;
+            object-position: center center;
+            display: block;
+            margin: 0 auto;
+        }
+        .splash-apk {
+            position: fixed;
+            inset: 0;
+            z-index: 90;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #ffffff;
+            transition: opacity 0.35s ease, visibility 0.35s ease;
+        }
+        .splash-apk.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
     </style>
 </head>
-<body class="antialiased py-6 px-4">
+<body class="antialiased select-none">
+
+    <!-- Splash APK con logo centrado y ajustado -->
+    <div id="adminSplash" class="splash-apk" aria-hidden="true">
+        <div class="w-20 h-20 rounded-2xl border border-purple-200 shadow-lg logo-frame">
+            <img src="https://i.postimg.cc/t4fJptrQ/BCV-20261120-041842-0000.png" alt="Logo Yimmi Kambio">
+        </div>
+        <div class="text-center">
+            <div class="text-sm font-black text-slate-900">Yimmi Kambio · Admin</div>
+            <div class="text-[10px] font-mono font-bold text-purple-700">APK en tiempo real...</div>
+        </div>
+    </div>
 
     <!-- Toast de Estado -->
-    <div id="adminToast" class="fixed bottom-5 right-5 z-50 hidden items-center gap-2.5 px-4 py-3 rounded-2xl bg-slate-900 text-white text-xs font-bold shadow-2xl border border-slate-700">
-        <i id="adminToastIcon" class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
-        <span id="adminToastText">Listo</span>
+    <div id="adminToast" class="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-900 text-white text-[11px] font-bold shadow-2xl border border-slate-700 max-w-[90vw]">
+        <i id="adminToastIcon" class="fa-solid fa-circle-check text-emerald-400 text-xs shrink-0"></i>
+        <span id="adminToastText" class="truncate">Listo</span>
     </div>
 
     <!-- Modal de Confirmación Integrado -->
     <div id="adminConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-        <div class="admin-surface rounded-3xl p-5 max-w-sm w-full space-y-4 text-center">
+        <div class="admin-surface rounded-3xl p-4 max-w-xs w-full space-y-3.5 text-center">
             <h3 id="adminConfirmTitle" class="text-sm font-black text-slate-900">Confirmar acción</h3>
             <p id="adminConfirmMsg" class="text-xs text-slate-600 leading-relaxed"></p>
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="cerrarConfirmAdmin()" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold cursor-pointer">Cancelar</button>
-                <button type="button" id="btnConfirmarAccionAdmin" class="py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold cursor-pointer">Eliminar</button>
+                <button type="button" onclick="cerrarConfirmAdmin()" class="py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold cursor-pointer">Cancelar</button>
+                <button type="button" id="btnConfirmarAccionAdmin" class="py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold cursor-pointer">Eliminar</button>
             </div>
         </div>
     </div>
 
-    <div class="max-w-2xl mx-auto space-y-5">
-        <!-- Encabezado con Menú Hamburguesa -->
-        <header class="admin-surface rounded-3xl p-4 sm:p-5 space-y-3 relative z-30">
-            <div class="flex items-center justify-between gap-3">
-                <a href="/" data-admin-route="/" class="flex items-center gap-3.5 min-w-0">
-                    <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 p-1 flex items-center justify-center shrink-0 shadow-2xs">
-                        <img src="https://i.postimg.cc/t4fJptrQ/BCV-20261120-041842-0000.png" alt="Logo Yimmi Kambio" class="w-full h-full object-contain rounded-xl bg-white">
+    <div class="apk-shell">
+        <!-- Encabezado Superior Estilo App Móvil -->
+        <header class="admin-surface border-b px-3 py-2.5 space-y-2 relative z-30 shrink-0">
+            <div class="flex items-center justify-between gap-2">
+                <a href="/" data-admin-route="/" class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-9 h-9 rounded-xl border border-slate-200 shrink-0 shadow-2xs logo-frame">
+                        <img src="https://i.postimg.cc/t4fJptrQ/BCV-20261120-041842-0000.png" alt="Logo Yimmi Kambio">
                     </div>
                     <div class="min-w-0">
-                        <div class="flex items-center gap-2">
-                            <h1 class="text-base sm:text-xl font-black text-slate-900 truncate">Yimmi Kambio · Admin</h1>
-                            <span class="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-mono font-bold">v1.3</span>
+                        <div class="flex items-center gap-1.5">
+                            <h1 class="text-sm font-black text-slate-900 truncate">Yimmi Kambio · Admin</h1>
+                            <span class="px-1.5 py-0.5 rounded-md bg-purple-50 border border-purple-200 text-purple-700 text-[9px] font-mono font-extrabold">APK</span>
                         </div>
-                        <p id="rutaActualLabel" class="text-[11px] font-mono text-purple-700 font-bold truncate">/</p>
+                        <p id="rutaActualLabel" class="text-[10px] font-mono text-purple-700 font-bold truncate">/</p>
                     </div>
                 </a>
 
-                <div class="flex items-center gap-2 shrink-0">
-                    <span id="estadoLiveBadge" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-mono font-extrabold">
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9px] font-mono font-extrabold">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span>RTDB LIVE</span>
+                        <span>LIVE</span>
                     </span>
 
-                    <button type="button" id="btnMenuAdmin" onclick="alternarMenuAdmin()" aria-expanded="false" aria-controls="panelMenuAdmin" aria-label="Abrir menú de navegación" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-800 flex items-center justify-center cursor-pointer transition">
-                        <i id="iconoMenuAdmin" class="fa-solid fa-bars text-sm"></i>
+                    <button type="button" id="btnMenuAdmin" onclick="alternarMenuAdmin()" aria-expanded="false" aria-controls="panelMenuAdmin" aria-label="Abrir menú de navegación" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-800 flex items-center justify-center cursor-pointer transition">
+                        <i id="iconoMenuAdmin" class="fa-solid fa-bars text-xs"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Panel Desplegable del Menú Hamburguesa -->
-            <nav id="panelMenuAdmin" class="hidden pt-3 border-t border-slate-100 space-y-2">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-extrabold">
-                    <a href="/" data-admin-route="/" onclick="cerrarMenuAdmin()" class="px-3.5 py-2.5 rounded-2xl bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-300 text-slate-800 flex items-center justify-between transition">
+            <!-- Panel Desplegable del Menú -->
+            <nav id="panelMenuAdmin" class="hidden pt-2 border-t border-slate-100 space-y-1.5">
+                <div class="grid grid-cols-1 gap-1.5 text-xs font-extrabold">
+                    <a href="/" data-admin-route="/" onclick="cerrarMenuAdmin()" class="px-3 py-2 rounded-xl bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-300 text-slate-800 flex items-center justify-between transition">
                         <span class="flex items-center gap-2">
                             <i class="fa-solid fa-house text-purple-600"></i>
-                            <span>Inicio</span>
+                            <span>Inicio (/config)</span>
                         </span>
                         <span class="font-mono text-[10px] text-slate-400">/</span>
                     </a>
 
-                    <a href="/publicar-tasas" data-admin-route="/publicar-tasas" onclick="cerrarMenuAdmin()" class="px-3.5 py-2.5 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-800 flex items-center justify-between transition">
+                    <a href="/publicar-tasas" data-admin-route="/publicar-tasas" onclick="cerrarMenuAdmin()" class="px-3 py-2 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-800 flex items-center justify-between transition">
                         <span class="flex items-center gap-2">
                             <i class="fa-solid fa-cloud-arrow-up text-blue-600"></i>
                             <span>Publicar nuevas tasas</span>
@@ -132,7 +201,7 @@
                         <span class="font-mono text-[10px] text-slate-400">/publicar-tasas</span>
                     </a>
 
-                    <a href="/historial-tasas" data-admin-route="/historial-tasas" onclick="cerrarMenuAdmin()" class="px-3.5 py-2.5 rounded-2xl bg-slate-50 hover:bg-fuchsia-50 border border-slate-200 hover:border-fuchsia-300 text-slate-800 flex items-center justify-between transition">
+                    <a href="/historial-tasas" data-admin-route="/historial-tasas" onclick="cerrarMenuAdmin()" class="px-3 py-2 rounded-xl bg-slate-50 hover:bg-fuchsia-50 border border-slate-200 hover:border-fuchsia-300 text-slate-800 flex items-center justify-between transition">
                         <span class="flex items-center gap-2">
                             <i class="fa-solid fa-clock-rotate-left text-fuchsia-600"></i>
                             <span>Historial (/historialTasas)</span>
@@ -143,178 +212,193 @@
             </nav>
         </header>
 
-        <!-- Bloqueo de Acceso -->
-        <section id="bloqueoAcceso" class="admin-surface rounded-3xl p-5 sm:p-7 space-y-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-700 shrink-0">
-                    <i class="fa-solid fa-lock text-sm"></i>
-                </div>
-                <div>
-                    <h2 class="text-sm sm:text-base font-black text-slate-900">Acceso al panel de control</h2>
-                    <p class="text-xs text-slate-600">Ingresa tu clave para administrar tasas vigentes e historial en tiempo real.</p>
-                </div>
-            </div>
-
-            <form onsubmit="desbloquearPanel(event)" class="flex flex-col sm:flex-row gap-2.5">
-                <input type="password" id="claveAccesoInput" required placeholder="Clave de acceso (por defecto: yimmi2026)" class="flex-1 admin-input rounded-2xl px-4 py-2.5 text-xs font-mono">
-                <button type="submit" class="btn-grad text-white text-xs font-extrabold px-6 py-2.5 rounded-2xl cursor-pointer shrink-0 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-unlock-keyhole"></i>
-                    <span>Desbloquear</span>
-                </button>
-            </form>
-        </section>
-
-        <!-- Panel Principal -->
-        <main id="panelAdminContenido" class="hidden space-y-5">
-            <!-- Vista / Ruta Inicio (/): Cotizaciones activas (/config) -->
-            <section id="secCotizacionesActuales" class="admin-surface rounded-3xl p-4 sm:p-6 space-y-4">
-                <div class="flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-purple-600"></span>
-                        <span class="text-xs font-black uppercase tracking-wider text-slate-800">Cotizaciones activas (/config)</span>
+        <!-- Área Desplazable de Contenido -->
+        <div class="apk-scroll space-y-3.5">
+            <!-- Bloqueo de Acceso -->
+            <section id="bloqueoAcceso" class="admin-surface rounded-3xl p-4 space-y-3.5">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-700 shrink-0">
+                        <i class="fa-solid fa-lock text-xs"></i>
                     </div>
-                    <div class="flex items-center gap-1.5">
-                        <a href="/historial-tasas" data-admin-route="/historial-tasas" class="px-2.5 py-1 rounded-xl bg-fuchsia-50 hover:bg-fuchsia-100 text-fuchsia-800 text-[11px] font-extrabold transition">
-                            Editar historial →
-                        </a>
-                        <a href="/publicar-tasas" data-admin-route="/publicar-tasas" class="px-2.5 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 text-[11px] font-extrabold transition">
-                            Publicar →
-                        </a>
+                    <div>
+                        <h2 class="text-sm font-black text-slate-900">Acceso al panel APK</h2>
+                        <p class="text-[11px] text-slate-600">Ingresa tu clave para gestionar tasas e historial en vivo.</p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono">
-                    <div class="rounded-2xl p-3.5 bg-blue-50/70 border border-blue-200/80">
-                        <div class="text-[10px] font-sans font-extrabold uppercase tracking-wider text-blue-800">Dólar BCV</div>
-                        <div id="actualUsd" class="text-base sm:text-lg font-extrabold text-slate-900 mt-1">--</div>
-                    </div>
-
-                    <div class="rounded-2xl p-3.5 bg-purple-50/70 border border-purple-200/80">
-                        <div class="text-[10px] font-sans font-extrabold uppercase tracking-wider text-purple-800">Euro BCV</div>
-                        <div id="actualEur" class="text-base sm:text-lg font-extrabold text-slate-900 mt-1">--</div>
-                    </div>
-
-                    <div class="rounded-2xl p-3.5 bg-fuchsia-50/70 border border-fuchsia-200/80">
-                        <div class="text-[10px] font-sans font-extrabold uppercase tracking-wider text-fuchsia-800">USDT</div>
-                        <div id="actualUsdt" class="text-base sm:text-lg font-extrabold text-slate-900 mt-1">--</div>
-                    </div>
-                </div>
+                <form onsubmit="desbloquearPanel(event)" class="space-y-2.5">
+                    <input type="password" id="claveAccesoInput" required placeholder="Clave (por defecto: yimmi2026)" class="w-full admin-input rounded-2xl px-3.5 py-2.5 text-xs font-mono">
+                    <button type="submit" class="w-full btn-grad text-white text-xs font-extrabold py-2.5 px-4 rounded-2xl cursor-pointer flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-unlock-keyhole"></i>
+                        <span>Desbloquear panel</span>
+                    </button>
+                </form>
             </section>
 
-            <!-- Vista / Ruta /publicar-tasas: Publicar nuevas tasas -->
-            <form id="secPublicarTasas" onsubmit="guardarTasasFirebase(event)" class="hidden admin-surface rounded-3xl p-5 sm:p-6 space-y-4">
-                <div class="border-b border-slate-100 pb-3.5 flex items-center justify-between gap-2">
-                    <div>
-                        <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-700">/publicar-tasas</span>
-                        <h2 class="text-base sm:text-lg font-black text-slate-900">Publicar nuevas tasas</h2>
-                        <p class="text-xs text-slate-500">Sincroniza la calculadora de la app y la página web al instante</p>
-                    </div>
-                    <i class="fa-solid fa-bolt text-purple-600 text-base"></i>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                    <div>
-                        <label for="inputTasaBcv" class="block text-xs font-extrabold text-slate-700 mb-1.5">Dólar BCV (Bs.)</label>
-                        <input type="text" inputmode="decimal" id="inputTasaBcv" required placeholder="0.00" class="w-full admin-input rounded-2xl px-3.5 py-2.5 text-sm font-mono font-extrabold text-slate-900">
+            <!-- Panel Principal -->
+            <main id="panelAdminContenido" class="hidden space-y-3.5">
+                <!-- Vista / Ruta Inicio (/): Cotizaciones activas (/config) -->
+                <section id="secCotizacionesActuales" class="admin-surface rounded-3xl p-3.5 space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-purple-600"></span>
+                            <span class="text-[11px] font-black uppercase tracking-wider text-slate-800">Tasas activas (/config)</span>
+                        </div>
+                        <a href="/publicar-tasas" data-admin-route="/publicar-tasas" class="px-2.5 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 text-[10px] font-extrabold transition">
+                            Editar tasas →
+                        </a>
                     </div>
 
-                    <div>
-                        <label for="inputTasaEuroBcv" class="block text-xs font-extrabold text-slate-700 mb-1.5">Euro BCV (Bs.)</label>
-                        <input type="text" inputmode="decimal" id="inputTasaEuroBcv" required placeholder="0.00" class="w-full admin-input rounded-2xl px-3.5 py-2.5 text-sm font-mono font-extrabold text-slate-900">
+                    <div class="grid grid-cols-1 gap-2 font-mono">
+                        <div class="rounded-2xl p-3 bg-blue-50/80 border border-blue-200/80 flex items-center justify-between">
+                            <span class="text-[11px] font-sans font-extrabold uppercase tracking-wider text-blue-800">Dólar BCV</span>
+                            <span id="actualUsd" class="text-base font-extrabold text-slate-900">--</span>
+                        </div>
+
+                        <div class="rounded-2xl p-3 bg-purple-50/80 border border-purple-200/80 flex items-center justify-between">
+                            <span class="text-[11px] font-sans font-extrabold uppercase tracking-wider text-purple-800">Euro BCV</span>
+                            <span id="actualEur" class="text-base font-extrabold text-slate-900">--</span>
+                        </div>
+
+                        <div class="rounded-2xl p-3 bg-fuchsia-50/80 border border-fuchsia-200/80 flex items-center justify-between">
+                            <span class="text-[11px] font-sans font-extrabold uppercase tracking-wider text-fuchsia-800">USDT</span>
+                            <span id="actualUsdt" class="text-base font-extrabold text-slate-900">--</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Vista / Ruta /publicar-tasas: Publicar nuevas tasas -->
+                <form id="secPublicarTasas" onsubmit="guardarTasasFirebase(event)" class="hidden admin-surface rounded-3xl p-4 space-y-3">
+                    <div class="border-b border-slate-100 pb-2.5 flex items-center justify-between gap-2">
+                        <div>
+                            <span class="text-[9px] font-mono font-bold uppercase tracking-wider text-blue-700">/publicar-tasas</span>
+                            <h2 class="text-sm font-black text-slate-900">Publicar nuevas tasas</h2>
+                            <p class="text-[11px] text-slate-500">Actualiza la app y la web al instante</p>
+                        </div>
+                        <i class="fa-solid fa-bolt text-purple-600 text-sm"></i>
                     </div>
 
-                    <div>
-                        <label for="inputTasaUsdt" class="block text-xs font-extrabold text-slate-700 mb-1.5">USDT (Bs.)</label>
-                        <input type="text" inputmode="decimal" id="inputTasaUsdt" required placeholder="0.00" class="w-full admin-input rounded-2xl px-3.5 py-2.5 text-sm font-mono font-extrabold text-slate-900">
+                    <div class="space-y-2.5">
+                        <div>
+                            <label for="inputTasaBcv" class="block text-[11px] font-extrabold text-slate-700 mb-1">Dólar BCV (Bs.)</label>
+                            <input type="text" inputmode="decimal" id="inputTasaBcv" required placeholder="0.00" class="w-full admin-input rounded-2xl px-3 py-2 text-sm font-mono font-extrabold text-slate-900">
+                        </div>
+
+                        <div>
+                            <label for="inputTasaEuroBcv" class="block text-[11px] font-extrabold text-slate-700 mb-1">Euro BCV (Bs.)</label>
+                            <input type="text" inputmode="decimal" id="inputTasaEuroBcv" required placeholder="0.00" class="w-full admin-input rounded-2xl px-3 py-2 text-sm font-mono font-extrabold text-slate-900">
+                        </div>
+
+                        <div>
+                            <label for="inputTasaUsdt" class="block text-[11px] font-extrabold text-slate-700 mb-1">USDT (Bs.)</label>
+                            <input type="text" inputmode="decimal" id="inputTasaUsdt" required placeholder="0.00" class="w-full admin-input rounded-2xl px-3 py-2 text-sm font-mono font-extrabold text-slate-900">
+                        </div>
                     </div>
-                </div>
 
-                <!-- Guardar en Historial -->
-                <div class="rounded-2xl p-3.5 bg-slate-50 border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <label class="flex items-center gap-2.5 text-xs font-extrabold text-slate-800 cursor-pointer">
-                        <input type="checkbox" id="chkGuardarHistorial" checked class="w-4 h-4 accent-purple-600 rounded cursor-pointer">
-                        <span>Registrar en /historialTasas</span>
-                    </label>
+                    <div class="rounded-2xl p-3 bg-slate-50 border border-slate-200/90 space-y-2">
+                        <label class="flex items-center gap-2 text-[11px] font-extrabold text-slate-800 cursor-pointer">
+                            <input type="checkbox" id="chkGuardarHistorial" checked class="w-4 h-4 accent-purple-600 rounded cursor-pointer">
+                            <span>Registrar en /historialTasas</span>
+                        </label>
 
-                    <div class="flex items-center gap-2">
-                        <label for="inputFechaHistorial" class="text-xs font-bold text-slate-600">Fecha:</label>
-                        <input type="date" id="inputFechaHistorial" required class="admin-input rounded-xl px-3 py-1.5 text-xs font-mono font-bold text-slate-900">
+                        <div class="flex items-center justify-between gap-2">
+                            <label for="inputFechaHistorial" class="text-[11px] font-bold text-slate-600">Fecha:</label>
+                            <input type="date" id="inputFechaHistorial" required class="admin-input rounded-xl px-2.5 py-1 text-xs font-mono font-bold text-slate-900">
+                        </div>
                     </div>
-                </div>
 
-                <button type="submit" id="btnGuardarTasas" class="w-full py-3.5 px-5 rounded-2xl btn-grad text-white text-xs sm:text-sm font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    <span>Publicar tasas ahora</span>
-                </button>
-            </form>
+                    <button type="submit" id="btnGuardarTasas" class="w-full py-3 px-4 rounded-2xl btn-grad text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span>Publicar tasas ahora</span>
+                    </button>
+                </form>
 
-            <!-- Vista / Ruta /historial-tasas: Editor en Tiempo Real del Historial (/historialTasas) -->
-            <section id="secHistorialTasas" class="hidden admin-surface rounded-3xl p-5 sm:p-6 space-y-4">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-fuchsia-700">/historial-tasas · /historialTasas</span>
+                <!-- Vista / Ruta /historial-tasas: Editor en Tiempo Real del Historial (/historialTasas) -->
+                <section id="secHistorialTasas" class="hidden admin-surface rounded-3xl p-3.5 space-y-3">
+                    <div class="border-b border-slate-100 pb-2.5 space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[9px] font-mono font-bold uppercase tracking-wider text-fuchsia-700">/historialTasas</span>
                             <span id="indicadorLiveHist" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9px] font-mono font-extrabold">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
                                 <span>TIEMPO REAL</span>
                             </span>
                         </div>
-                        <h2 class="text-base sm:text-lg font-black text-slate-900">Editor en tiempo real de historial</h2>
-                        <p id="subtituloOrigenHist" class="text-xs text-slate-500">Escuchando cambios en vivo para BCV, Euro y USDT</p>
+                        <div>
+                            <h2 class="text-sm font-black text-slate-900">Historial en tiempo real</h2>
+                            <p id="subtituloOrigenHist" class="text-[10px] text-slate-500">Escuchando cambios en vivo</p>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                            <button type="button" id="tabHistUsd" onclick="cambiarMonedaHistorialAdmin('usd')" class="px-2 py-1.5 rounded-lg text-[10px] font-black bg-white text-slate-900 shadow-2xs cursor-pointer transition">BCV (USD)</button>
+                            <button type="button" id="tabHistEur" onclick="cambiarMonedaHistorialAdmin('eur')" class="px-2 py-1.5 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition">Euro (EUR)</button>
+                            <button type="button" id="tabHistUsdt" onclick="cambiarMonedaHistorialAdmin('usdt')" class="px-2 py-1.5 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition">USDT</button>
+                        </div>
                     </div>
 
-                    <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 self-start sm:self-auto">
-                        <button type="button" id="tabHistUsd" onclick="cambiarMonedaHistorialAdmin('usd')" class="px-3 py-1.5 rounded-lg text-[11px] font-black bg-white text-slate-900 shadow-2xs cursor-pointer transition">BCV (USD)</button>
-                        <button type="button" id="tabHistEur" onclick="cambiarMonedaHistorialAdmin('eur')" class="px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition">Euro (EUR)</button>
-                        <button type="button" id="tabHistUsdt" onclick="cambiarMonedaHistorialAdmin('usdt')" class="px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition">USDT</button>
-                    </div>
-                </div>
-
-                <!-- Agregar o Actualizar Fecha Directamente en Tiempo Real -->
-                <form onsubmit="guardarRegistroManualTiempoReal(event)" class="rounded-2xl p-3 bg-purple-50/60 border border-purple-200/80 grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
-                    <div>
-                        <label for="inputNuevaFechaHist" class="block text-[10px] font-extrabold uppercase text-purple-900 mb-1">Fecha (YYYY-MM-DD)</label>
-                        <input type="date" id="inputNuevaFechaHist" required class="w-full admin-input rounded-xl px-3 py-1.5 text-xs font-mono font-bold text-slate-900">
-                    </div>
-                    <div>
-                        <label for="inputNuevoValorHist" class="block text-[10px] font-extrabold uppercase text-purple-900 mb-1">Valor en Bs.</label>
-                        <input type="text" inputmode="decimal" id="inputNuevoValorHist" required placeholder="0.00" class="w-full admin-input rounded-xl px-3 py-1.5 text-xs font-mono font-extrabold text-right text-slate-900">
-                    </div>
-                    <button type="submit" class="w-full py-2 px-3 rounded-xl btn-grad text-white text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer">
-                        <i class="fa-solid fa-plus-circle"></i>
-                        <span>Guardar / Actualizar</span>
-                    </button>
-                </form>
-
-                <!-- Controles de Selección y Acciones -->
-                <div class="flex flex-wrap items-center justify-between gap-2 rounded-2xl p-2.5 bg-slate-50 border border-slate-200/90 text-xs">
-                    <label class="flex items-center gap-2 px-1.5 font-extrabold text-slate-700 cursor-pointer">
-                        <input type="checkbox" id="chkSeleccionarTodosHist" onchange="alternarSeleccionTodosHist(this.checked)" class="w-4 h-4 accent-purple-600 rounded cursor-pointer">
-                        <span>Seleccionar todos</span>
-                    </label>
-
-                    <div class="flex flex-wrap items-center gap-1.5">
-                        <button type="button" onclick="cargarRegistrosBaseEnFirebase()" class="px-3 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-900 font-extrabold text-[11px] flex items-center gap-1.5 cursor-pointer transition">
-                            <i class="fa-solid fa-database"></i>
-                            <span>Cargar base</span>
+                    <!-- Agregar o Actualizar Fecha Directamente en Tiempo Real -->
+                    <form onsubmit="guardarRegistroManualTiempoReal(event)" class="rounded-2xl p-2.5 bg-purple-50/70 border border-purple-200/80 space-y-2">
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <div>
+                                <label for="inputNuevaFechaHist" class="block text-[9px] font-extrabold uppercase text-purple-900 mb-0.5">Fecha</label>
+                                <input type="date" id="inputNuevaFechaHist" required class="w-full admin-input rounded-xl px-2 py-1.5 text-[11px] font-mono font-bold text-slate-900">
+                            </div>
+                            <div>
+                                <label for="inputNuevoValorHist" class="block text-[9px] font-extrabold uppercase text-purple-900 mb-0.5">Valor (Bs.)</label>
+                                <input type="text" inputmode="decimal" id="inputNuevoValorHist" required placeholder="0.00" class="w-full admin-input rounded-xl px-2 py-1.5 text-[11px] font-mono font-extrabold text-right text-slate-900">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full py-2 px-3 rounded-xl btn-grad text-white text-[11px] font-extrabold flex items-center justify-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span>Guardar / Actualizar fecha</span>
                         </button>
-                        <button type="button" onclick="eliminarSeleccionadosHist()" class="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-extrabold text-[11px] flex items-center gap-1.5 cursor-pointer transition">
-                            <i class="fa-solid fa-trash-can"></i>
-                            <span>Borrar sel.</span>
-                        </button>
-                        <button type="button" onclick="eliminarTodoHistorialMoneda()" class="px-3 py-1.5 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-800 font-extrabold text-[11px] flex items-center gap-1.5 cursor-pointer transition">
-                            <i class="fa-solid fa-broom"></i>
-                            <span>Eliminar todo</span>
-                        </button>
-                    </div>
-                </div>
+                    </form>
 
-                <!-- Listado de Fechas y Tasas en Tiempo Real -->
-                <div id="listaHistorialAdmin" class="space-y-2 max-h-80 overflow-y-auto pr-1">
-                    <div class="text-center text-xs text-slate-500 py-4">Conectando con historial en tiempo real...</div>
-                </div>
-            </section>
-        </main>
+                    <!-- Controles de Selección y Acciones -->
+                    <div class="space-y-1.5 rounded-2xl p-2 bg-slate-50 border border-slate-200/90 text-[11px]">
+                        <label class="flex items-center gap-2 px-1 font-extrabold text-slate-700 cursor-pointer">
+                            <input type="checkbox" id="chkSeleccionarTodosHist" onchange="alternarSeleccionTodosHist(this.checked)" class="w-4 h-4 accent-purple-600 rounded cursor-pointer">
+                            <span>Seleccionar todos</span>
+                        </label>
+
+                        <div class="grid grid-cols-3 gap-1">
+                            <button type="button" onclick="cargarRegistrosBaseEnFirebase()" class="px-2 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-900 font-extrabold text-[10px] flex items-center justify-center gap-1 cursor-pointer transition">
+                                <i class="fa-solid fa-database"></i>
+                                <span>Base</span>
+                            </button>
+                            <button type="button" onclick="eliminarSeleccionadosHist()" class="px-2 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-extrabold text-[10px] flex items-center justify-center gap-1 cursor-pointer transition">
+                                <i class="fa-solid fa-trash-can"></i>
+                                <span>Borrar sel.</span>
+                            </button>
+                            <button type="button" onclick="eliminarTodoHistorialMoneda()" class="px-2 py-1.5 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-800 font-extrabold text-[10px] flex items-center justify-center gap-1 cursor-pointer transition">
+                                <i class="fa-solid fa-broom"></i>
+                                <span>Todo</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Listado de Fechas y Tasas en Tiempo Real -->
+                    <div id="listaHistorialAdmin" class="space-y-1.5 max-h-64 overflow-y-auto pr-0.5">
+                        <div class="text-center text-xs text-slate-500 py-4">Conectando con historial en tiempo real...</div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Barra Inferior Estilo App Móvil (APK) -->
+        <nav id="barraNavApk" class="admin-surface border-t px-2 py-1.5 grid grid-cols-3 gap-1 shrink-0 z-20">
+            <a href="/" data-admin-route="/" id="navApkInicio" class="py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-[10px] font-extrabold btn-grad text-white transition">
+                <i class="fa-solid fa-house text-xs"></i>
+                <span>Inicio</span>
+            </a>
+            <a href="/publicar-tasas" data-admin-route="/publicar-tasas" id="navApkPublicar" class="py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-[10px] font-extrabold text-slate-600 hover:bg-slate-100 transition">
+                <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
+                <span>Publicar</span>
+            </a>
+            <a href="/historial-tasas" data-admin-route="/historial-tasas" id="navApkHistorial" class="py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-[10px] font-extrabold text-slate-600 hover:bg-slate-100 transition">
+                <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+                <span>Historial</span>
+            </a>
+        </nav>
     </div>
 
     <script type="module">
@@ -514,6 +598,23 @@
             return "/";
         }
 
+        function actualizarEstilosNavInferior(rutaLimpia) {
+            const mapaNav = {
+                "/": "navApkInicio",
+                "/publicar-tasas": "navApkPublicar",
+                "/historial-tasas": "navApkHistorial"
+            };
+            Object.entries(mapaNav).forEach(([r, id]) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (r === rutaLimpia) {
+                    el.className = "py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-[10px] font-extrabold btn-grad text-white transition";
+                } else {
+                    el.className = "py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-[10px] font-extrabold text-slate-600 hover:bg-slate-100 transition";
+                }
+            });
+        }
+
         function aplicarVistaPorRuta(ruta, push = true) {
             const rutaLimpia = normalizarRutaAdmin(ruta);
             rutaAdminActiva = rutaLimpia;
@@ -528,6 +629,8 @@
             if (labelRuta) {
                 labelRuta.textContent = rutaLimpia;
             }
+
+            actualizarEstilosNavInferior(rutaLimpia);
 
             const secActuales = document.getElementById("secCotizacionesActuales");
             const secPublicar = document.getElementById("secPublicarTasas");
@@ -599,15 +702,15 @@
             if (!toast || !msg || !icon) return;
             msg.textContent = texto;
             icon.className = esError
-                ? "fa-solid fa-circle-exclamation text-rose-400 text-sm"
-                : "fa-solid fa-circle-check text-emerald-400 text-sm";
+                ? "fa-solid fa-circle-exclamation text-rose-400 text-xs shrink-0"
+                : "fa-solid fa-circle-check text-emerald-400 text-xs shrink-0";
             toast.classList.remove("hidden");
             toast.classList.add("flex");
             if (toastTimer) clearTimeout(toastTimer);
             toastTimer = setTimeout(() => {
                 toast.classList.add("hidden");
                 toast.classList.remove("flex");
-            }, 2800);
+            }, 2600);
         }
 
         function parseNumero(raw) {
@@ -652,9 +755,9 @@
                 const btn = document.getElementById(id);
                 if (!btn) return;
                 if (key === monedaHistorialActual) {
-                    btn.className = "px-3 py-1.5 rounded-lg text-[11px] font-black bg-white text-slate-900 shadow-2xs cursor-pointer transition";
+                    btn.className = "px-2 py-1.5 rounded-lg text-[10px] font-black bg-white text-slate-900 shadow-2xs cursor-pointer transition";
                 } else {
-                    btn.className = "px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition";
+                    btn.className = "px-2 py-1.5 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition";
                 }
             });
         }
@@ -667,26 +770,26 @@
 
             if (!registrosHistorialActual.length) {
                 cont.innerHTML = `
-                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center text-xs text-slate-500">
-                        No hay registros en <strong>/historialTasas/${monedaHistorialActual}</strong>. Usa el formulario superior o <strong>Cargar base</strong>.
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center text-[11px] text-slate-500">
+                        Sin registros en <strong>/historialTasas/${monedaHistorialActual}</strong>. Toca <strong>Base</strong> o agrega uno arriba.
                     </div>
                 `;
                 return;
             }
 
             cont.innerHTML = registrosHistorialActual.map((item, idx) => `
-                <div class="bg-slate-50/90 hover:bg-white border border-slate-200/90 rounded-2xl px-3.5 py-2 flex items-center justify-between gap-2 transition">
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <input type="checkbox" data-hist-key="${encodeURIComponent(item.key)}" class="chk-hist-item w-4 h-4 accent-purple-600 rounded cursor-pointer">
-                        <span class="text-xs font-mono font-bold text-slate-800 truncate">${item.key}</span>
+                <div class="bg-slate-50/90 hover:bg-white border border-slate-200/90 rounded-2xl px-2.5 py-1.5 flex items-center justify-between gap-1.5 transition">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <input type="checkbox" data-hist-key="${encodeURIComponent(item.key)}" class="chk-hist-item w-3.5 h-3.5 accent-purple-600 rounded cursor-pointer shrink-0">
+                        <span class="text-[11px] font-mono font-bold text-slate-800 truncate">${item.key}</span>
                     </div>
 
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <input type="text" inputmode="decimal" id="histVal_${idx}" value="${item.valor.toFixed(2)}" class="w-24 admin-input rounded-xl px-2.5 py-1 text-xs font-mono font-extrabold text-right text-slate-900">
-                        <button type="button" onclick="guardarEdicionRegistroHist(${idx})" class="px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold cursor-pointer transition" title="Guardar edición en tiempo real">
+                    <div class="flex items-center gap-1 shrink-0">
+                        <input type="text" inputmode="decimal" id="histVal_${idx}" value="${item.valor.toFixed(2)}" class="w-20 admin-input rounded-xl px-2 py-1 text-[11px] font-mono font-extrabold text-right text-slate-900">
+                        <button type="button" onclick="guardarEdicionRegistroHist(${idx})" class="w-7 h-7 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold flex items-center justify-center cursor-pointer transition" title="Guardar">
                             <i class="fa-solid fa-check"></i>
                         </button>
-                        <button type="button" onclick="eliminarUnRegistroHist(${idx})" class="px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold cursor-pointer transition" title="Eliminar registro">
+                        <button type="button" onclick="eliminarUnRegistroHist(${idx})" class="w-7 h-7 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold flex items-center justify-center cursor-pointer transition" title="Eliminar">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
@@ -732,8 +835,8 @@
             const sub = document.getElementById("subtituloOrigenHist");
             if (sub) {
                 sub.textContent = desdeFirebase
-                    ? `En vivo · /historialTasas/${moneda} (${registrosHistorialActual.length} registros)`
-                    : `Base precargada · ${moneda.toUpperCase()} (${registrosHistorialActual.length} registros)`;
+                    ? `En vivo · /historialTasas/${moneda} (${registrosHistorialActual.length})`
+                    : `Base precargada · ${moneda.toUpperCase()} (${registrosHistorialActual.length})`;
             }
 
             renderListaHistorialAdmin();
@@ -771,7 +874,7 @@
             const valorNum = parseNumero(document.getElementById("inputNuevoValorHist")?.value);
 
             if (!fechaIso || isNaN(valorNum) || valorNum <= 0) {
-                mostrarAviso("Selecciona una fecha válida y un monto mayor a 0", true);
+                mostrarAviso("Fecha o monto inválido", true);
                 return;
             }
 
@@ -780,7 +883,7 @@
                 await marcarSincronizacionHistorial(monedaHistorialActual);
                 mostrarAviso(`Guardado ${fechaIso} (${valorNum.toFixed(2)} Bs.)`);
             } catch (err) {
-                mostrarAviso("Error al guardar registro en tiempo real", true);
+                mostrarAviso("Error al guardar registro", true);
             }
         };
 
@@ -797,9 +900,9 @@
                 });
                 await set(ref(db, `historialTasas/${monedaHistorialActual}`), payloadLimpio);
                 await marcarSincronizacionHistorial(monedaHistorialActual);
-                mostrarAviso(`Base de ${monedaHistorialActual.toUpperCase()} cargada y sincronizada`);
+                mostrarAviso(`Base de ${monedaHistorialActual.toUpperCase()} cargada`);
             } catch (err) {
-                mostrarAviso("Error al cargar la base en Firebase", true);
+                mostrarAviso("Error al cargar base", true);
             }
         };
 
@@ -813,16 +916,16 @@
             const input = document.getElementById(`histVal_${idx}`);
             const nuevoVal = parseNumero(input?.value);
             if (isNaN(nuevoVal) || nuevoVal <= 0) {
-                mostrarAviso("Ingresa un monto válido mayor a 0", true);
+                mostrarAviso("Monto inválido", true);
                 return;
             }
 
             try {
                 await set(ref(db, `historialTasas/${monedaHistorialActual}/${reg.key}`), Number(nuevoVal.toFixed(2)));
                 await marcarSincronizacionHistorial(monedaHistorialActual);
-                mostrarAviso(`Actualizado ${reg.key} en tiempo real`);
+                mostrarAviso(`Actualizado ${reg.key}`);
             } catch (err) {
-                mostrarAviso("Error al editar registro", true);
+                mostrarAviso("Error al editar", true);
             }
         };
 
@@ -835,7 +938,7 @@
                 await marcarSincronizacionHistorial(monedaHistorialActual);
                 mostrarAviso(`Eliminado ${reg.key}`);
             } catch (err) {
-                mostrarAviso("Error al eliminar registro", true);
+                mostrarAviso("Error al eliminar", true);
             }
         };
 
@@ -869,14 +972,14 @@
         window.eliminarTodoHistorialMoneda = async function() {
             abrirConfirmAdmin(
                 "Eliminar historial",
-                `¿Eliminar TODO el historial de ${monedaHistorialActual.toUpperCase()}? Esta acción no se puede deshacer.`,
+                `¿Eliminar TODO el historial de ${monedaHistorialActual.toUpperCase()}?`,
                 async () => {
                     try {
                         await remove(ref(db, `historialTasas/${monedaHistorialActual}`));
                         await marcarSincronizacionHistorial(monedaHistorialActual);
                         mostrarAviso(`Historial de ${monedaHistorialActual.toUpperCase()} eliminado`);
                     } catch (err) {
-                        mostrarAviso("Error al eliminar todo el historial", true);
+                        mostrarAviso("Error al eliminar todo", true);
                     }
                 }
             );
@@ -930,7 +1033,7 @@
                 sessionStorage.setItem(STORAGE_DESBLOQUEO, "1");
             } catch (err) {}
             mostrarPanelDesbloqueado();
-            mostrarAviso("Panel desbloqueado en tiempo real");
+            mostrarAviso("Panel desbloqueado");
         };
 
         window.guardarTasasFirebase = async function(e) {
@@ -967,13 +1070,22 @@
                     await marcarSincronizacionHistorial(monedaHistorialActual);
                 }
 
-                mostrarAviso("Tasas publicadas y sincronizadas");
+                mostrarAviso("Tasas publicadas");
             } catch (err) {
-                mostrarAviso("Error al guardar: revisa permisos o conexión", true);
+                mostrarAviso("Error al guardar tasas", true);
             } finally {
                 if (btn) btn.disabled = false;
             }
         };
+
+        function ocultarSplashAdmin() {
+            const sp = document.getElementById("adminSplash");
+            if (!sp) return;
+            setTimeout(() => {
+                sp.classList.add("hide");
+                setTimeout(() => sp.remove(), 350);
+            }, 850);
+        }
 
         window.addEventListener("DOMContentLoaded", () => {
             aplicarVistaPorRuta(window.location.pathname, false);
@@ -982,6 +1094,7 @@
                     mostrarPanelDesbloqueado();
                 }
             } catch (err) {}
+            ocultarSplashAdmin();
         });
     </script>
 </body>
