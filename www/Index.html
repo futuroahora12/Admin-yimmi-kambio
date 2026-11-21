@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Tasas | Yimmi Kambio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background:
+                radial-gradient(circle at 12% 0%, rgba(124, 58, 237, 0.12), transparent 42%),
+                radial-gradient(circle at 88% 8%, rgba(37, 99, 235, 0.12), transparent 42%),
+                #f1f5f9;
+            color: #0f172a;
+            min-height: 100vh;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+        .admin-surface {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 14px 34px -16px rgba(15, 23, 42, 0.12);
+        }
+        .admin-input {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+        }
+        .admin-input:focus {
+            outline: none;
+            background: #ffffff;
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.14);
+        }
+        .btn-grad {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 60%, #c026d3 100%);
+            box-shadow: 0 10px 22px -8px rgba(124, 58, 237, 0.45);
+            transition: transform 0.15s ease, filter 0.15s ease;
+        }
+        .btn-grad:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+        .btn-grad:active {
+            transform: scale(0.99);
+        }
+    </style>
+</head>
+<body class="antialiased py-6 px-4">
+
+    <!-- Toast de Estado -->
+    <div id="adminToast" class="fixed bottom-5 right-5 z-50 hidden items-center gap-2.5 px-4 py-3 rounded-2xl bg-slate-900 text-white text-xs font-bold shadow-2xl border border-slate-700">
+        <i id="adminToastIcon" class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+        <span id="adminToastText">Listo</span>
+    </div>
+
+    <!-- Modal de Confirmación Integrado -->
+    <div id="adminConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+        <div class="admin-surface rounded-3xl p-5 max-w-sm w-full space-y-4 text-center">
+            <h3 id="adminConfirmTitle" class="text-sm font-black text-slate-900">Confirmar acción</h3>
+            <p id="adminConfirmMsg" class="text-xs text-slate-600 leading-relaxed"></p>
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="cerrarConfirmAdmin()" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold cursor-pointer">Cancelar</button>
+                <button type="button" id="btnConfirmarAccionAdmin" class="py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold cursor-pointer">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-2xl mx-auto space-y-5">
+        <!-- Encabezado con Menú Hamburguesa -->
+        <header class="admin-surface rounded-3xl p-4 sm:p-5 space-y-3 relative z-30">
+            <div class="flex items-center justify-between gap-3">
+                <a href="/" data-admin-route="/" class="flex items-center gap-3.5 min-w-0">
+                    <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 p-1 flex items-center justify-center shrink-0 shadow-2xs">
+                        <img src="https://i.postimg.cc/t4fJptrQ/BCV-20261120-041842-0000.png" alt="Logo Yimmi Kambio" class="w-full h-full object-contain rounded-xl bg-white">
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-base sm:text-xl font-black text-slate-900 truncate">Yimmi Kambio · Admin</h1>
+                            <span class="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-mono font-bold">v1.3</span>
+                        </div>
+                        <p id="rutaActualLabel" class="text-[11px] font-mono text-purple-700 font-bold truncate">/</p>
+                    </div>
+                </a>
+
+                <div class="flex items-center gap-2 shrink-0">
+                    <span id="estadoLiveBadge" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-mono font-extrabold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>RTDB LIVE</span>
+                    </span>
+
+                    <button type="button" id="btnMenuAdmin" onclick="alternarMenuAdmin()" aria-expanded="false" aria-controls="panelMenuAdmin" aria-label="Abrir menú de navegación" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-800 flex items-center justify-center cursor-pointer transition">
+                        <i id="iconoMenuAdmin" class="fa-solid fa-bars text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel Desplegable del Menú Hamburguesa -->
+            <nav id="panelMenuAdmin" class="hidden pt-3 border-t border-slate-100 space-y-2">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-extrabold">
+                    <a href="/" data-admin-route="/" onclick="cerrarMenuAdmin()" class="px-3.5 py-2.5 rounded-2xl bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-300 text-slate-800 flex items-center justify-between transition">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-house text-purple-600"></i>
+                            <span>Inicio</span>
+                        </span>
+                        <span class="font-mono text-[10px] text-slate-400">/</span>
+                    </a>
+
+                    <a href="/publicar-tasas" data-admin-route="/publicar-tasas" onclick="cerrarMenuAdmin()" class="px-3.5 py-2.5 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-800 flex items-center justify-between transition">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up text-blue-600"></i>
+                            <span>Publicar nuevas tasas</span>
+                        </span>
+                        <span class="font-mono text-[10px] text-slate-400">/publicar-tasas</span>
+                    </a>
+
+                    <a href="/historial-tasas" data-admin-route="/historial-tasas" onclick="cerrarMenuAdmin()" class="px-3.5 py-2.5 rounded-2xl bg-slate-50 hover:bg-fuchsia-50 border border-slate-200 hover:border-fuchsia-300 text-slate-800 flex items-center justify-between transition">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-fuchsia-600"></i>
+                            <span>Historial (/historialTasas)</span>
+                        </span>
+                        <span class="font-mono text-[10px] text-slate-400">/historial-tasas</span>
+                    </a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Bloqueo de Acceso -->
+        <section id="bloqueoAcceso" class="admin-surface rounded-3xl p-5 sm:p-7 space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-700 shrink-0">
+                    <i class="fa-solid fa-lock text-sm"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm sm:text-base font-black text-slate-900">Acceso al panel de control</h2>
+                    <p class="text-xs text-slate-600">Ingresa tu clave para administrar tasas vigentes e historial en tiempo real.</p>
+                </div>
+            </div>
+
+            <form onsubmit="desbloquearPanel(event)" class="flex flex-col sm:flex-row gap-2.5">
+                <input type="password" id="claveAccesoInput" required placeholder="Clave de acceso (por defecto: yimmi2026)" class="flex-1 admin-input rounded-2xl px-4 py-2.5 text-xs font-mono">
+                <button type="submit" class="btn-grad text-white text-xs font-extrabold px-6 py-2.5 rounded-2xl cursor-pointer shrink-0 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-unlock-keyhole"></i>
+                    <span>Desbloquear</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- Panel Principal -->
+        <main id="panelAdminContenido" class="hidden space-y-5">
+            <!-- Vista / Ruta Inicio (/): Cotizaciones activas (/config) -->
+            <section id="secCotizacionesActuales" class="admin-surface rounded-3xl p-4 sm:p-6 space-y-4">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-purple-600"></span>
+                        <span class="text-xs font-black uppercase tracking-wider text-slate-800">Cotizaciones activas (/config)</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <a href="/historial-tasas" data-admin-route="/historial-tasas" class="px-2.5 py-1 rounded-xl bg-fuchsia-50 hover:bg-fuchsia-100 text-fuchsia-800 text-[11px] font-extrabold transition">
+                            Editar historial →
+                        </a>
+                        <a href="/publicar-tasas" data-admin-route="/publicar-tasas" class="px-2.5 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 text-[11px] font-extrabold transition">
+                            Publicar →
+                        </a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono">
+                    <div class="rounded-2xl p-3.5 bg-blue-50/70 border border-blue-200/80">
+                        <div class="text-[10px] font-sans font-extrabold uppercase tracking-wider text-blue-800">Dólar BCV</div>
+                        <div id="actualUsd" class="text-base sm:text-lg font-extrabold text-slate-900 mt-1">--</div>
+                    </div>
+
+                    <div class="rounded-2xl p-3.5 bg-purple-50/70 border border-purple-200/80">
+                        <div class="text-[10px] font-sans font-extrabold uppercase tracking-wider text-purple-800">Euro BCV</div>
+                        <div id="actualEur" class="text-base sm:text-lg font-extrabold text-slate-900 mt-1">--</div>
+                    </div>
+
+                    <div class="rounded-2xl p-3.5 bg-fuchsia-50/70 border border-fuchsia-200/80">
+                        <div class="text-[10px] font-sans font-extrabold uppercase tracking-wider text-fuchsia-800">USDT</div>
+                        <div id="actualUsdt" class="text-base sm:text-lg font-extrabold text-slate-900 mt-1">--</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Vista / Ruta /publicar-tasas: Publicar nuevas tasas -->
+            <form id="secPublicarTasas" onsubmit="guardarTasasFirebase(event)" class="hidden admin-surface rounded-3xl p-5 sm:p-6 space-y-4">
+                <div class="border-b border-slate-100 pb-3.5 flex items-center justify-between gap-2">
+                    <div>
+                        <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-700">/publicar-tasas</span>
+                        <h2 class="text-base sm:text-lg font-black text-slate-900">Publicar nuevas tasas</h2>
+                        <p class="text-xs text-slate-500">Sincroniza la calculadora de la app y la página web al instante</p>
+                    </div>
+                    <i class="fa-solid fa-bolt text-purple-600 text-base"></i>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                    <div>
+                        <label for="inputTasaBcv" class="block text-xs font-extrabold text-slate-700 mb-1.5">Dólar BCV (Bs.)</label>
+                        <input type="text" inputmode="decimal" id="inputTasaBcv" required placeholder="0.00" class="w-full admin-input rounded-2xl px-3.5 py-2.5 text-sm font-mono font-extrabold text-slate-900">
+                    </div>
+
+                    <div>
+                        <label for="inputTasaEuroBcv" class="block text-xs font-extrabold text-slate-700 mb-1.5">Euro BCV (Bs.)</label>
+                        <input type="text" inputmode="decimal" id="inputTasaEuroBcv" required placeholder="0.00" class="w-full admin-input rounded-2xl px-3.5 py-2.5 text-sm font-mono font-extrabold text-slate-900">
+                    </div>
+
+                    <div>
+                        <label for="inputTasaUsdt" class="block text-xs font-extrabold text-slate-700 mb-1.5">USDT (Bs.)</label>
+                        <input type="text" inputmode="decimal" id="inputTasaUsdt" required placeholder="0.00" class="w-full admin-input rounded-2xl px-3.5 py-2.5 text-sm font-mono font-extrabold text-slate-900">
+                    </div>
+                </div>
+
+                <!-- Guardar en Historial -->
+                <div class="rounded-2xl p-3.5 bg-slate-50 border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <label class="flex items-center gap-2.5 text-xs font-extrabold text-slate-800 cursor-pointer">
+                        <input type="checkbox" id="chkGuardarHistorial" checked class="w-4 h-4 accent-purple-600 rounded cursor-pointer">
+                        <span>Registrar en /historialTasas</span>
+                    </label>
+
+                    <div class="flex items-center gap-2">
+                        <label for="inputFechaHistorial" class="text-xs font-bold text-slate-600">Fecha:</label>
+                        <input type="date" id="inputFechaHistorial" required class="admin-input rounded-xl px-3 py-1.5 text-xs font-mono font-bold text-slate-900">
+                    </div>
+                </div>
+
+                <button type="submit" id="btnGuardarTasas" class="w-full py-3.5 px-5 rounded-2xl btn-grad text-white text-xs sm:text-sm font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span>Publicar tasas ahora</span>
+                </button>
+            </form>
+
+            <!-- Vista / Ruta /historial-tasas: Editor en Tiempo Real del Historial (/historialTasas) -->
+            <section id="secHistorialTasas" class="hidden admin-surface rounded-3xl p-5 sm:p-6 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-fuchsia-700">/historial-tasas · /historialTasas</span>
+                            <span id="indicadorLiveHist" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9px] font-mono font-extrabold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                                <span>TIEMPO REAL</span>
+                            </span>
+                        </div>
+                        <h2 class="text-base sm:text-lg font-black text-slate-900">Editor en tiempo real de historial</h2>
+                        <p id="subtituloOrigenHist" class="text-xs text-slate-500">Escuchando cambios en vivo para BCV, Euro y USDT</p>
+                    </div>
+
+                    <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 self-start sm:self-auto">
+                        <button type="button" id="tabHistUsd" onclick="cambiarMonedaHistorialAdmin('usd')" class="px-3 py-1.5 rounded-lg text-[11px] font-black bg-white text-slate-900 shadow-2xs cursor-pointer transition">BCV (USD)</button>
+                        <button type="button" id="tabHistEur" onclick="cambiarMonedaHistorialAdmin('eur')" class="px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition">Euro (EUR)</button>
+                        <button type="button" id="tabHistUsdt" onclick="cambiarMonedaHistorialAdmin('usdt')" class="px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition">USDT</button>
+                    </div>
+                </div>
+
+                <!-- Agregar o Actualizar Fecha Directamente en Tiempo Real -->
+                <form onsubmit="guardarRegistroManualTiempoReal(event)" class="rounded-2xl p-3 bg-purple-50/60 border border-purple-200/80 grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+                    <div>
+                        <label for="inputNuevaFechaHist" class="block text-[10px] font-extrabold uppercase text-purple-900 mb-1">Fecha (YYYY-MM-DD)</label>
+                        <input type="date" id="inputNuevaFechaHist" required class="w-full admin-input rounded-xl px-3 py-1.5 text-xs font-mono font-bold text-slate-900">
+                    </div>
+                    <div>
+                        <label for="inputNuevoValorHist" class="block text-[10px] font-extrabold uppercase text-purple-900 mb-1">Valor en Bs.</label>
+                        <input type="text" inputmode="decimal" id="inputNuevoValorHist" required placeholder="0.00" class="w-full admin-input rounded-xl px-3 py-1.5 text-xs font-mono font-extrabold text-right text-slate-900">
+                    </div>
+                    <button type="submit" class="w-full py-2 px-3 rounded-xl btn-grad text-white text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        <span>Guardar / Actualizar</span>
+                    </button>
+                </form>
+
+                <!-- Controles de Selección y Acciones -->
+                <div class="flex flex-wrap items-center justify-between gap-2 rounded-2xl p-2.5 bg-slate-50 border border-slate-200/90 text-xs">
+                    <label class="flex items-center gap-2 px-1.5 font-extrabold text-slate-700 cursor-pointer">
+                        <input type="checkbox" id="chkSeleccionarTodosHist" onchange="alternarSeleccionTodosHist(this.checked)" class="w-4 h-4 accent-purple-600 rounded cursor-pointer">
+                        <span>Seleccionar todos</span>
+                    </label>
+
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <button type="button" onclick="cargarRegistrosBaseEnFirebase()" class="px-3 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-900 font-extrabold text-[11px] flex items-center gap-1.5 cursor-pointer transition">
+                            <i class="fa-solid fa-database"></i>
+                            <span>Cargar base</span>
+                        </button>
+                        <button type="button" onclick="eliminarSeleccionadosHist()" class="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-extrabold text-[11px] flex items-center gap-1.5 cursor-pointer transition">
+                            <i class="fa-solid fa-trash-can"></i>
+                            <span>Borrar sel.</span>
+                        </button>
+                        <button type="button" onclick="eliminarTodoHistorialMoneda()" class="px-3 py-1.5 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-800 font-extrabold text-[11px] flex items-center gap-1.5 cursor-pointer transition">
+                            <i class="fa-solid fa-broom"></i>
+                            <span>Eliminar todo</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Listado de Fechas y Tasas en Tiempo Real -->
+                <div id="listaHistorialAdmin" class="space-y-2 max-h-80 overflow-y-auto pr-1">
+                    <div class="text-center text-xs text-slate-500 py-4">Conectando con historial en tiempo real...</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+        import { getDatabase, ref, onValue, update, set, remove } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-database.js";
+
+        const CLAVE_PANEL_LOCAL = "yimmi2026";
+        const STORAGE_DESBLOQUEO = "yimmi_kambio_admin_unlocked";
+
+        const RUTAS_ADMIN_VALIDAS = ["/", "/publicar-tasas", "/historial-tasas"];
+
+        const HISTORIAL_BASE_ADMIN = {
+            usd: [
+                { fecha: "2026-10-21", valor: 883.40 },
+                { fecha: "2026-10-22", valor: 884.75 },
+                { fecha: "2026-10-23", valor: 886.23 },
+                { fecha: "2026-10-26", valor: 887.30 },
+                { fecha: "2026-10-28", valor: 888.12 },
+                { fecha: "2026-10-29", valor: 888.89 },
+                { fecha: "2026-10-30", valor: 889.26 },
+                { fecha: "2026-11-02", valor: 889.58 },
+                { fecha: "2026-11-03", valor: 891.11 },
+                { fecha: "2026-11-04", valor: 893.22 },
+                { fecha: "2026-11-05", valor: 894.89 },
+                { fecha: "2026-11-06", valor: 896.12 },
+                { fecha: "2026-11-09", valor: 897.54 },
+                { fecha: "2026-11-10", valor: 899.27 },
+                { fecha: "2026-11-11", valor: 901.62 },
+                { fecha: "2026-11-12", valor: 904.45 },
+                { fecha: "2026-11-13", valor: 911.62 },
+                { fecha: "2026-11-16", valor: 914.02 },
+                { fecha: "2026-11-17", valor: 915.75 },
+                { fecha: "2026-11-18", valor: 916.65 },
+                { fecha: "2026-11-19", valor: 917.78 },
+                { fecha: "2026-11-20", valor: 918.77 },
+                { fecha: "2026-11-23", valor: 919.82 }
+            ],
+            eur: [
+                { fecha: "2026-10-21", valor: 993.18 },
+                { fecha: "2026-10-22", valor: 993.21 },
+                { fecha: "2026-10-23", valor: 993.09 },
+                { fecha: "2026-10-26", valor: 994.04 },
+                { fecha: "2026-10-28", valor: 989.72 },
+                { fecha: "2026-10-29", valor: 989.39 },
+                { fecha: "2026-10-30", valor: 992.80 },
+                { fecha: "2026-11-02", valor: 991.25 },
+                { fecha: "2026-11-03", valor: 997.92 },
+                { fecha: "2026-11-04", valor: 999.77 },
+                { fecha: "2026-11-05", valor: 1006.03 },
+                { fecha: "2026-11-06", valor: 1004.96 },
+                { fecha: "2026-11-09", valor: 1001.19 },
+                { fecha: "2026-11-10", valor: 1006.61 },
+                { fecha: "2026-11-11", valor: 1007.96 },
+                { fecha: "2026-11-12", valor: 1003.49 },
+                { fecha: "2026-11-13", valor: 1009.34 },
+                { fecha: "2026-11-16", valor: 1010.56 },
+                { fecha: "2026-11-17", valor: 1008.31 },
+                { fecha: "2026-11-18", valor: 1007.39 },
+                { fecha: "2026-11-19", valor: 1007.40 },
+                { fecha: "2026-11-20", valor: 1009.07 },
+                { fecha: "2026-11-23", valor: 1011.18 }
+            ],
+            usdt: [
+                { fecha: "2026-10-23", valor: 1002.11 },
+                { fecha: "2026-10-24", valor: 1003.92 },
+                { fecha: "2026-10-25", valor: 1005.50 },
+                { fecha: "2026-10-26", valor: 999.05 },
+                { fecha: "2026-10-27", valor: 1003.82 },
+                { fecha: "2026-10-28", valor: 1004.69 },
+                { fecha: "2026-10-29", valor: 998.00 },
+                { fecha: "2026-10-30", valor: 990.62 },
+                { fecha: "2026-10-31", valor: 980.00 },
+                { fecha: "2026-11-01", valor: 993.61 },
+                { fecha: "2026-11-02", valor: 997.50 },
+                { fecha: "2026-11-03", valor: 1006.00 },
+                { fecha: "2026-11-04", valor: 1008.99 },
+                { fecha: "2026-11-05", valor: 1010.90 },
+                { fecha: "2026-11-06", valor: 1024.19 },
+                { fecha: "2026-11-07", valor: 1033.30 },
+                { fecha: "2026-11-08", valor: 1033.32 },
+                { fecha: "2026-11-09", valor: 1054.00 },
+                { fecha: "2026-11-10", valor: 1076.31 },
+                { fecha: "2026-11-11", valor: 1075.11 },
+                { fecha: "2026-11-12", valor: 1073.65 },
+                { fecha: "2026-11-13", valor: 1071.30 },
+                { fecha: "2026-11-14", valor: 1071.00 },
+                { fecha: "2026-11-15", valor: 1075.00 },
+                { fecha: "2026-11-16", valor: 1066.00 },
+                { fecha: "2026-11-17", valor: 1066.01 },
+                { fecha: "2026-11-18", valor: 1072.50 },
+                { fecha: "2026-11-19", valor: 1064.00 },
+                { fecha: "2026-11-20", valor: 1078.70 },
+                { fecha: "2026-11-21", valor: 1076.91 }
+            ]
+        };
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAee29RNZa3A-C-8APC1x_yMzViMgR7bBA",
+            authDomain: "futuro-ahora.firebaseapp.com",
+            databaseURL: "https://futuro-ahora-default-rtdb.firebaseio.com",
+            projectId: "futuro-ahora",
+            storageBucket: "futuro-ahora.firebasestorage.app",
+            messagingSenderId: "727564715444",
+            appId: "1:727564715444:web:0c4d66d7c2260daaeddee1",
+            measurementId: "G-EDDTRWG6VV"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let monedaHistorialActual = "usd";
+        let registrosHistorialActual = [];
+        let rutaAdminActiva = "/";
+        let toastTimer = null;
+        let accionConfirmPendiente = null;
+        let unsubscribeHistorialLive = null;
+        let listenersConfigActivos = false;
+
+        function normalizarClaveFechaISO(rawFecha) {
+            if (!rawFecha) return "";
+            const limpia = String(rawFecha).trim();
+            const isoMatch = limpia.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+            if (isoMatch) {
+                return `${isoMatch[1]}-${String(isoMatch[2]).padStart(2, "0")}-${String(isoMatch[3]).padStart(2, "0")}`;
+            }
+            const veMatch = limpia.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})$/);
+            if (veMatch) {
+                const anio = veMatch[3].length === 2 ? `20${veMatch[3]}` : veMatch[3];
+                return `${anio}-${String(veMatch[2]).padStart(2, "0")}-${String(veMatch[1]).padStart(2, "0")}`;
+            }
+            const dt = new Date(limpia);
+            if (!isNaN(dt.getTime())) {
+                return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+            }
+            return limpia;
+        }
+
+        function fechaClaveATimestamp(clave) {
+            const iso = normalizarClaveFechaISO(clave);
+            const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (m) {
+                return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0).getTime();
+            }
+            return 0;
+        }
+
+        function ordenarRegistrosCronologicamente(lista) {
+            return [...lista].sort((a, b) => {
+                const tsA = fechaClaveATimestamp(a.key);
+                const tsB = fechaClaveATimestamp(b.key);
+                if (tsA !== tsB) return tsB - tsA;
+                return String(b.key).localeCompare(String(a.key));
+            });
+        }
+
+        async function marcarSincronizacionHistorial(moneda) {
+            await set(ref(db, "historialTasas/ultimaSincronizacion"), {
+                moneda,
+                fecha: new Date().toISOString()
+            });
+        }
+
+        window.cerrarConfirmAdmin = function() {
+            accionConfirmPendiente = null;
+            const modal = document.getElementById("adminConfirmModal");
+            if (modal) {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
+        };
+
+        function abrirConfirmAdmin(titulo, mensaje, onAceptar) {
+            accionConfirmPendiente = onAceptar;
+            const modal = document.getElementById("adminConfirmModal");
+            const tEl = document.getElementById("adminConfirmTitle");
+            const mEl = document.getElementById("adminConfirmMsg");
+            if (tEl) tEl.textContent = titulo;
+            if (mEl) mEl.textContent = mensaje;
+            if (modal) {
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+            }
+        }
+
+        document.getElementById("btnConfirmarAccionAdmin")?.addEventListener("click", async () => {
+            const fn = accionConfirmPendiente;
+            window.cerrarConfirmAdmin();
+            if (typeof fn === "function") await fn();
+        });
+
+        function normalizarRutaAdmin(pathname) {
+            if (!pathname) return "/";
+            const limpia = pathname.replace(/\/+$/, "") || "/";
+            if (RUTAS_ADMIN_VALIDAS.includes(limpia)) return limpia;
+            if (limpia.endsWith("/publicar-tasas")) return "/publicar-tasas";
+            if (limpia.endsWith("/historial-tasas")) return "/historial-tasas";
+            return "/";
+        }
+
+        function aplicarVistaPorRuta(ruta, push = true) {
+            const rutaLimpia = normalizarRutaAdmin(ruta);
+            rutaAdminActiva = rutaLimpia;
+
+            if (push && window.location.pathname !== rutaLimpia) {
+                try {
+                    window.history.pushState({ adminRoute: rutaLimpia }, "", rutaLimpia);
+                } catch (e) {}
+            }
+
+            const labelRuta = document.getElementById("rutaActualLabel");
+            if (labelRuta) {
+                labelRuta.textContent = rutaLimpia;
+            }
+
+            const secActuales = document.getElementById("secCotizacionesActuales");
+            const secPublicar = document.getElementById("secPublicarTasas");
+            const secHistorial = document.getElementById("secHistorialTasas");
+
+            if (rutaLimpia === "/publicar-tasas") {
+                secActuales?.classList.add("hidden");
+                secPublicar?.classList.remove("hidden");
+                secHistorial?.classList.add("hidden");
+            } else if (rutaLimpia === "/historial-tasas") {
+                secActuales?.classList.add("hidden");
+                secPublicar?.classList.add("hidden");
+                secHistorial?.classList.remove("hidden");
+            } else {
+                secActuales?.classList.remove("hidden");
+                secPublicar?.classList.add("hidden");
+                secHistorial?.classList.add("hidden");
+            }
+        }
+
+        window.irARutaAdmin = function(ruta, push = true) {
+            aplicarVistaPorRuta(ruta, push);
+        };
+
+        window.setEstadoMenuAdmin = function(abierto) {
+            const panel = document.getElementById("panelMenuAdmin");
+            const btn = document.getElementById("btnMenuAdmin");
+            const icono = document.getElementById("iconoMenuAdmin");
+            if (!panel || !btn || !icono) return;
+            panel.classList.toggle("hidden", !abierto);
+            btn.setAttribute("aria-expanded", String(abierto));
+            icono.classList.toggle("fa-bars", !abierto);
+            icono.classList.toggle("fa-xmark", abierto);
+        };
+
+        window.alternarMenuAdmin = function() {
+            const btn = document.getElementById("btnMenuAdmin");
+            const abierto = btn?.getAttribute("aria-expanded") === "true";
+            window.setEstadoMenuAdmin(!abierto);
+        };
+
+        window.cerrarMenuAdmin = function() {
+            window.setEstadoMenuAdmin(false);
+        };
+
+        document.addEventListener("click", (e) => {
+            const link = e.target.closest("a[data-admin-route]");
+            if (link && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
+                e.preventDefault();
+                aplicarVistaPorRuta(link.getAttribute("data-admin-route"), true);
+                return;
+            }
+            const panel = document.getElementById("panelMenuAdmin");
+            if (panel && !panel.classList.contains("hidden")) {
+                if (!e.target.closest("#panelMenuAdmin") && !e.target.closest("#btnMenuAdmin")) {
+                    window.cerrarMenuAdmin();
+                }
+            }
+        });
+
+        window.addEventListener("popstate", () => {
+            aplicarVistaPorRuta(window.location.pathname, false);
+        });
+
+        function mostrarAviso(texto, esError = false) {
+            const toast = document.getElementById("adminToast");
+            const msg = document.getElementById("adminToastText");
+            const icon = document.getElementById("adminToastIcon");
+            if (!toast || !msg || !icon) return;
+            msg.textContent = texto;
+            icon.className = esError
+                ? "fa-solid fa-circle-exclamation text-rose-400 text-sm"
+                : "fa-solid fa-circle-check text-emerald-400 text-sm";
+            toast.classList.remove("hidden");
+            toast.classList.add("flex");
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add("hidden");
+                toast.classList.remove("flex");
+            }, 2800);
+        }
+
+        function parseNumero(raw) {
+            if (raw === undefined || raw === null) return NaN;
+            const limpio = String(raw).trim().replace(/\s+/g, "").replace(",", ".");
+            return parseFloat(limpio);
+        }
+
+        function fmtDisplay(n) {
+            const val = parseFloat(n);
+            if (isNaN(val)) return "--";
+            return val.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function obtenerFechaHoyISO() {
+            const hoy = new Date();
+            const copia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+            const diaSemana = hoy.getDay();
+            const hora = hoy.getHours();
+
+            if (diaSemana === 5 && hora >= 20) {
+                copia.setDate(copia.getDate() + 3);
+            } else if (diaSemana === 6) {
+                copia.setDate(copia.getDate() + 2);
+            } else if (diaSemana === 0) {
+                copia.setDate(copia.getDate() + 1);
+            }
+
+            const y = copia.getFullYear();
+            const m = String(copia.getMonth() + 1).padStart(2, "0");
+            const d = String(copia.getDate()).padStart(2, "0");
+            return `${y}-${m}-${d}`;
+        }
+
+        function actualizarEstilosTabsHist() {
+            const mapa = {
+                usd: "tabHistUsd",
+                eur: "tabHistEur",
+                usdt: "tabHistUsdt"
+            };
+            Object.entries(mapa).forEach(([key, id]) => {
+                const btn = document.getElementById(id);
+                if (!btn) return;
+                if (key === monedaHistorialActual) {
+                    btn.className = "px-3 py-1.5 rounded-lg text-[11px] font-black bg-white text-slate-900 shadow-2xs cursor-pointer transition";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition";
+                }
+            });
+        }
+
+        function renderListaHistorialAdmin() {
+            const cont = document.getElementById("listaHistorialAdmin");
+            const chkAll = document.getElementById("chkSeleccionarTodosHist");
+            if (!cont) return;
+            if (chkAll) chkAll.checked = false;
+
+            if (!registrosHistorialActual.length) {
+                cont.innerHTML = `
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center text-xs text-slate-500">
+                        No hay registros en <strong>/historialTasas/${monedaHistorialActual}</strong>. Usa el formulario superior o <strong>Cargar base</strong>.
+                    </div>
+                `;
+                return;
+            }
+
+            cont.innerHTML = registrosHistorialActual.map((item, idx) => `
+                <div class="bg-slate-50/90 hover:bg-white border border-slate-200/90 rounded-2xl px-3.5 py-2 flex items-center justify-between gap-2 transition">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <input type="checkbox" data-hist-key="${encodeURIComponent(item.key)}" class="chk-hist-item w-4 h-4 accent-purple-600 rounded cursor-pointer">
+                        <span class="text-xs font-mono font-bold text-slate-800 truncate">${item.key}</span>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <input type="text" inputmode="decimal" id="histVal_${idx}" value="${item.valor.toFixed(2)}" class="w-24 admin-input rounded-xl px-2.5 py-1 text-xs font-mono font-extrabold text-right text-slate-900">
+                        <button type="button" onclick="guardarEdicionRegistroHist(${idx})" class="px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold cursor-pointer transition" title="Guardar edición en tiempo real">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button type="button" onclick="eliminarUnRegistroHist(${idx})" class="px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold cursor-pointer transition" title="Eliminar registro">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function procesarSnapshotHistorial(raw, moneda) {
+            const lista = [];
+            let desdeFirebase = false;
+
+            if (raw && typeof raw === "object") {
+                if (Array.isArray(raw)) {
+                    raw.forEach((v, i) => {
+                        if (v !== null && v !== undefined) {
+                            const num = typeof v === "object" ? parseNumero(v.valor ?? v.tasa ?? v.monto) : parseNumero(v);
+                            const fechaKey = normalizarClaveFechaISO(typeof v === "object" ? (v.fecha || v.date || String(i)) : String(i));
+                            if (!isNaN(num) && num > 0 && fechaKey) {
+                                lista.push({ key: fechaKey, valor: num });
+                                desdeFirebase = true;
+                            }
+                        }
+                    });
+                } else {
+                    Object.entries(raw).forEach(([k, v]) => {
+                        if (k === "ultimaSincronizacion") return;
+                        const num = typeof v === "object" && v !== null ? parseNumero(v.valor ?? v.tasa ?? v.monto) : parseNumero(v);
+                        const fechaKey = normalizarClaveFechaISO(k);
+                        if (!isNaN(num) && num > 0 && fechaKey) {
+                            lista.push({ key: fechaKey, valor: num });
+                            desdeFirebase = true;
+                        }
+                    });
+                }
+            }
+
+            registrosHistorialActual = lista.length > 0
+                ? ordenarRegistrosCronologicamente(lista)
+                : ordenarRegistrosCronologicamente(
+                    (HISTORIAL_BASE_ADMIN[moneda] || []).map(r => ({ key: normalizarClaveFechaISO(r.fecha), valor: r.valor }))
+                );
+
+            const sub = document.getElementById("subtituloOrigenHist");
+            if (sub) {
+                sub.textContent = desdeFirebase
+                    ? `En vivo · /historialTasas/${moneda} (${registrosHistorialActual.length} registros)`
+                    : `Base precargada · ${moneda.toUpperCase()} (${registrosHistorialActual.length} registros)`;
+            }
+
+            renderListaHistorialAdmin();
+        }
+
+        window.cargarHistorialAdmin = function(moneda = monedaHistorialActual) {
+            monedaHistorialActual = moneda;
+            actualizarEstilosTabsHist();
+
+            if (typeof unsubscribeHistorialLive === "function") {
+                unsubscribeHistorialLive();
+                unsubscribeHistorialLive = null;
+            }
+
+            const cont = document.getElementById("listaHistorialAdmin");
+            if (cont && !registrosHistorialActual.length) {
+                cont.innerHTML = `<div class="text-center text-xs text-slate-500 py-4">Conectando con historial en tiempo real...</div>`;
+            }
+
+            unsubscribeHistorialLive = onValue(
+                ref(db, `historialTasas/${moneda}`),
+                (snap) => {
+                    procesarSnapshotHistorial(snap.exists() ? snap.val() : null, moneda);
+                },
+                () => {
+                    procesarSnapshotHistorial(null, moneda);
+                    mostrarAviso("Sin conexión en vivo: mostrando base precargada", true);
+                }
+            );
+        };
+
+        window.guardarRegistroManualTiempoReal = async function(e) {
+            e.preventDefault();
+            const fechaIso = normalizarClaveFechaISO(document.getElementById("inputNuevaFechaHist")?.value);
+            const valorNum = parseNumero(document.getElementById("inputNuevoValorHist")?.value);
+
+            if (!fechaIso || isNaN(valorNum) || valorNum <= 0) {
+                mostrarAviso("Selecciona una fecha válida y un monto mayor a 0", true);
+                return;
+            }
+
+            try {
+                await set(ref(db, `historialTasas/${monedaHistorialActual}/${fechaIso}`), Number(valorNum.toFixed(2)));
+                await marcarSincronizacionHistorial(monedaHistorialActual);
+                mostrarAviso(`Guardado ${fechaIso} (${valorNum.toFixed(2)} Bs.)`);
+            } catch (err) {
+                mostrarAviso("Error al guardar registro en tiempo real", true);
+            }
+        };
+
+        window.cargarRegistrosBaseEnFirebase = async function() {
+            const listaBase = HISTORIAL_BASE_ADMIN[monedaHistorialActual] || [];
+            if (!listaBase.length) return;
+            try {
+                const payloadLimpio = {};
+                listaBase.forEach(item => {
+                    const claveIso = normalizarClaveFechaISO(item.fecha);
+                    if (claveIso) {
+                        payloadLimpio[claveIso] = Number(parseFloat(item.valor).toFixed(2));
+                    }
+                });
+                await set(ref(db, `historialTasas/${monedaHistorialActual}`), payloadLimpio);
+                await marcarSincronizacionHistorial(monedaHistorialActual);
+                mostrarAviso(`Base de ${monedaHistorialActual.toUpperCase()} cargada y sincronizada`);
+            } catch (err) {
+                mostrarAviso("Error al cargar la base en Firebase", true);
+            }
+        };
+
+        window.cambiarMonedaHistorialAdmin = function(moneda) {
+            window.cargarHistorialAdmin(moneda);
+        };
+
+        window.guardarEdicionRegistroHist = async function(idx) {
+            const reg = registrosHistorialActual[idx];
+            if (!reg) return;
+            const input = document.getElementById(`histVal_${idx}`);
+            const nuevoVal = parseNumero(input?.value);
+            if (isNaN(nuevoVal) || nuevoVal <= 0) {
+                mostrarAviso("Ingresa un monto válido mayor a 0", true);
+                return;
+            }
+
+            try {
+                await set(ref(db, `historialTasas/${monedaHistorialActual}/${reg.key}`), Number(nuevoVal.toFixed(2)));
+                await marcarSincronizacionHistorial(monedaHistorialActual);
+                mostrarAviso(`Actualizado ${reg.key} en tiempo real`);
+            } catch (err) {
+                mostrarAviso("Error al editar registro", true);
+            }
+        };
+
+        window.eliminarUnRegistroHist = async function(idx) {
+            const reg = registrosHistorialActual[idx];
+            if (!reg) return;
+
+            try {
+                await remove(ref(db, `historialTasas/${monedaHistorialActual}/${reg.key}`));
+                await marcarSincronizacionHistorial(monedaHistorialActual);
+                mostrarAviso(`Eliminado ${reg.key}`);
+            } catch (err) {
+                mostrarAviso("Error al eliminar registro", true);
+            }
+        };
+
+        window.alternarSeleccionTodosHist = function(marcado) {
+            document.querySelectorAll(".chk-hist-item").forEach(chk => {
+                chk.checked = Boolean(marcado);
+            });
+        };
+
+        window.eliminarSeleccionadosHist = async function() {
+            const seleccionados = Array.from(document.querySelectorAll(".chk-hist-item:checked"))
+                .map(chk => decodeURIComponent(chk.getAttribute("data-hist-key") || ""))
+                .filter(Boolean);
+
+            if (!seleccionados.length) {
+                mostrarAviso("Selecciona al menos un registro", true);
+                return;
+            }
+
+            try {
+                await Promise.all(
+                    seleccionados.map(k => remove(ref(db, `historialTasas/${monedaHistorialActual}/${k}`)))
+                );
+                await marcarSincronizacionHistorial(monedaHistorialActual);
+                mostrarAviso(`Eliminados ${seleccionados.length} registros`);
+            } catch (err) {
+                mostrarAviso("Error al borrar seleccionados", true);
+            }
+        };
+
+        window.eliminarTodoHistorialMoneda = async function() {
+            abrirConfirmAdmin(
+                "Eliminar historial",
+                `¿Eliminar TODO el historial de ${monedaHistorialActual.toUpperCase()}? Esta acción no se puede deshacer.`,
+                async () => {
+                    try {
+                        await remove(ref(db, `historialTasas/${monedaHistorialActual}`));
+                        await marcarSincronizacionHistorial(monedaHistorialActual);
+                        mostrarAviso(`Historial de ${monedaHistorialActual.toUpperCase()} eliminado`);
+                    } catch (err) {
+                        mostrarAviso("Error al eliminar todo el historial", true);
+                    }
+                }
+            );
+        };
+
+        function iniciarListenersConfigEnVivo() {
+            if (listenersConfigActivos) return;
+            listenersConfigActivos = true;
+
+            onValue(ref(db, "config"), (snap) => {
+                const val = snap.exists() ? snap.val() : null;
+                const usd = parseNumero(val?.tasaBcv) || 919.82;
+                const eur = parseNumero(val?.tasaEuroBcv) || 1011.18;
+                const usdt = parseNumero(val?.tasaUsdt) || 1076.91;
+
+                document.getElementById("actualUsd").textContent = "Bs. " + fmtDisplay(usd);
+                document.getElementById("actualEur").textContent = "Bs. " + fmtDisplay(eur);
+                document.getElementById("actualUsdt").textContent = "Bs. " + fmtDisplay(usdt);
+
+                const inpUsd = document.getElementById("inputTasaBcv");
+                const inpEur = document.getElementById("inputTasaEuroBcv");
+                const inpUsdt = document.getElementById("inputTasaUsdt");
+
+                if (inpUsd && document.activeElement !== inpUsd) inpUsd.value = usd.toFixed(2);
+                if (inpEur && document.activeElement !== inpEur) inpEur.value = eur.toFixed(2);
+                if (inpUsdt && document.activeElement !== inpUsdt) inpUsdt.value = usdt.toFixed(2);
+            });
+        }
+
+        function mostrarPanelDesbloqueado() {
+            document.getElementById("bloqueoAcceso")?.classList.add("hidden");
+            document.getElementById("panelAdminContenido")?.classList.remove("hidden");
+            const fechaInput = document.getElementById("inputFechaHistorial");
+            const fechaNuevaHist = document.getElementById("inputNuevaFechaHist");
+            const hoyIso = obtenerFechaHoyISO();
+            if (fechaInput && !fechaInput.value) fechaInput.value = hoyIso;
+            if (fechaNuevaHist && !fechaNuevaHist.value) fechaNuevaHist.value = hoyIso;
+            aplicarVistaPorRuta(window.location.pathname, false);
+            iniciarListenersConfigEnVivo();
+            window.cargarHistorialAdmin(monedaHistorialActual);
+        }
+
+        window.desbloquearPanel = function(e) {
+            e.preventDefault();
+            const clave = (document.getElementById("claveAccesoInput")?.value || "").trim();
+            if (clave !== CLAVE_PANEL_LOCAL) {
+                mostrarAviso("Clave incorrecta", true);
+                return;
+            }
+            try {
+                sessionStorage.setItem(STORAGE_DESBLOQUEO, "1");
+            } catch (err) {}
+            mostrarPanelDesbloqueado();
+            mostrarAviso("Panel desbloqueado en tiempo real");
+        };
+
+        window.guardarTasasFirebase = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById("btnGuardarTasas");
+            const usd = parseNumero(document.getElementById("inputTasaBcv")?.value);
+            const eur = parseNumero(document.getElementById("inputTasaEuroBcv")?.value);
+            const usdt = parseNumero(document.getElementById("inputTasaUsdt")?.value);
+            const guardarHist = Boolean(document.getElementById("chkGuardarHistorial")?.checked);
+            const fechaHist = normalizarClaveFechaISO(document.getElementById("inputFechaHistorial")?.value) || obtenerFechaHoyISO();
+
+            if ([usd, eur, usdt].some(n => isNaN(n) || n <= 0)) {
+                mostrarAviso("Verifica que todas las tasas sean mayores a 0", true);
+                return;
+            }
+
+            if (btn) btn.disabled = true;
+            try {
+                const ahoraIso = new Date().toISOString();
+                await update(ref(db, "config"), {
+                    tasaBcv: Number(usd.toFixed(2)),
+                    tasaEuroBcv: Number(eur.toFixed(2)),
+                    tasaUsdt: Number(usdt.toFixed(2)),
+                    fechaActualizacion: fechaHist,
+                    actualizadoEn: ahoraIso
+                });
+
+                if (guardarHist && fechaHist) {
+                    await Promise.all([
+                        set(ref(db, `historialTasas/usd/${fechaHist}`), Number(usd.toFixed(2))),
+                        set(ref(db, `historialTasas/eur/${fechaHist}`), Number(eur.toFixed(2))),
+                        set(ref(db, `historialTasas/usdt/${fechaHist}`), Number(usdt.toFixed(2)))
+                    ]);
+                    await marcarSincronizacionHistorial(monedaHistorialActual);
+                }
+
+                mostrarAviso("Tasas publicadas y sincronizadas");
+            } catch (err) {
+                mostrarAviso("Error al guardar: revisa permisos o conexión", true);
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        };
+
+        window.addEventListener("DOMContentLoaded", () => {
+            aplicarVistaPorRuta(window.location.pathname, false);
+            try {
+                if (sessionStorage.getItem(STORAGE_DESBLOQUEO) === "1") {
+                    mostrarPanelDesbloqueado();
+                }
+            } catch (err) {}
+        });
+    </script>
+</body>
+</html>
