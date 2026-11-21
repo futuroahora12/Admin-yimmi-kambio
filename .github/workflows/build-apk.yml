@@ -32,8 +32,9 @@ jobs:
 
       - name: Add Android platform if missing
         run: |
-          if [ ! -d "android" ]; then
-            npx cap add android --no-sync || true
+          if [ ! -f "android/gradlew" ]; then
+            rm -rf android
+            npx cap add android
           fi
           mkdir -p android/app/src/main/assets
 
