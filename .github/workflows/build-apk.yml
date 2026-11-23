@@ -22,24 +22,22 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Prepare web assets (www)
+      - name: Ensure www/index.html exists
         run: |
           mkdir -p www
-          if [ -f "index.html" ]; then
+          if [ ! -f "www/index.html" ] && [ -f "index.html" ]; then
             cp index.html www/index.html
           fi
 
-      - name: Install dependencies & sync Capacitor
+      - name: Install dependencies and prepare Android platform
         run: |
-          if [ -f "package.json" ]; then
-            npm ci || npm install
+          npm ci || npm install
+          if [ ! -d "android" ]; then
+            npx cap add android
           fi
-          if [ -f "capacitor.config.json" ] || [ -f "capacitor.config.ts" ]; then
-            npx cap sync android
-          fi
+          npx cap sync android
 
       - name: Generate Yimmi Kambio app icons from logo
-        if: hashFiles('android/app/src/main/res') != ''
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq python3-pil
           curl -sSL "https://i.postimg.cc/t4fJptrQ/BCV-20261120-041842-0000.png" -o /tmp/yimmi_logo.png
@@ -64,19 +62,15 @@ jobs:
               icon.save(os.path.join(out_dir, "ic_launcher.png"))
               icon.save(os.path.join(out_dir, "ic_launcher_round.png"))
               icon.save(os.path.join(out_dir, "ic_launcher_foreground.png"))
-
-          print("Iconos de Yimmi Kambio generados correctamente.")
           EOF
 
       - name: Build Debug APK
-        if: hashFiles('android/gradlew') != ''
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
       - name: Upload Debug APK artifact
-        if: hashFiles('android/app/build/outputs/apk/debug/app-debug.apk') != ''
         uses: actions/upload-artifact@v4
         with:
           name: Yimmi-Kambio-Admin-APK
