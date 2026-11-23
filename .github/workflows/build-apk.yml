@@ -2,15 +2,6 @@ name: Build APK Yimmi Kambio Admin
 
 on:
   workflow_dispatch:
-    inputs:
-      version_code:
-        description: 'Version Code (entero, ej. 1)'
-        required: false
-        default: '1'
-      version_name:
-        description: 'Version Name (ej. 1.0.0)'
-        required: false
-        default: '1.0.0'
 
 jobs:
   build-apk:
@@ -77,14 +68,6 @@ jobs:
           print("Iconos de Yimmi Kambio generados correctamente.")
           EOF
 
-      - name: Update versionCode and versionName in build.gradle
-        if: hashFiles('android/app/build.gradle') != ''
-        run: |
-          VC="${{ github.event.inputs.version_code }}"
-          VN="${{ github.event.inputs.version_name }}"
-          sed -i "s/versionCode [0-9]\+/versionCode ${VC}/g" android/app/build.gradle
-          sed -i "s/versionName \"[^\"]*\"/versionName \"${VN}\"/g" android/app/build.gradle
-
       - name: Build Debug APK
         if: hashFiles('android/gradlew') != ''
         run: |
@@ -96,5 +79,5 @@ jobs:
         if: hashFiles('android/app/build/outputs/apk/debug/app-debug.apk') != ''
         uses: actions/upload-artifact@v4
         with:
-          name: Yimmi-Kambio-Admin-Debug-APK
+          name: Yimmi-Kambio-Admin-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
