@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Admin Tasas | Yimmi Kambio</title>
+    <title>Yimmi Kambio Admin | yimmi-kambio-v2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -21,1080 +22,487 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         html, body {
-            width: 100%;
-            height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            min-height: 100%;
+            min-height: 100dvh;
             font-family: 'Outfit', sans-serif;
-            background: #e2e8f0;
+            background:
+                radial-gradient(ellipse 80% 50% at 15% -5%, rgba(168, 85, 247, 0.16), transparent 55%),
+                radial-gradient(ellipse 75% 50% at 88% 5%, rgba(59, 130, 246, 0.16), transparent 55%),
+                #f1f5f9;
             color: #0f172a;
             -webkit-tap-highlight-color: transparent;
+        }
+        html.dark, html.dark body {
+            background:
+                radial-gradient(ellipse 80% 50% at 15% -5%, rgba(168, 85, 247, 0.22), transparent 55%),
+                radial-gradient(ellipse 75% 50% at 88% 5%, rgba(59, 130, 246, 0.20), transparent 55%),
+                #060811;
+            color: #f8fafc;
         }
         .font-mono {
             font-family: 'JetBrains Mono', monospace;
             font-variant-numeric: tabular-nums;
         }
-        .apk-shell {
+        .admin-shell {
             width: 100%;
-            max-width: 430px;
-            height: 100vh;
-            height: 100dvh;
+            max-width: 520px;
+            min-height: 100vh;
+            min-height: 100dvh;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            position: relative;
-            overflow: hidden;
-            background:
-                radial-gradient(circle at 12% 0%, rgba(124, 58, 237, 0.11), transparent 42%),
-                radial-gradient(circle at 88% 8%, rgba(37, 99, 235, 0.11), transparent 42%),
-                #f8fafc;
-            box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08), 0 20px 45px -16px rgba(15, 23, 42, 0.2);
+            justify-content: space-between;
         }
-        .apk-scroll {
-            flex: 1;
-            overflow-y: auto;
-            padding: 12px 12px 18px 12px;
+        .neon-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: 0 14px 34px -16px rgba(79, 70, 229, 0.14);
         }
-        ::-webkit-scrollbar { width: 3px; height: 3px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #2563eb, #7c3aed);
-            border-radius: 9999px;
+        html.dark .neon-card {
+            background: rgba(15, 20, 36, 0.88);
+            border: 1px solid rgba(168, 85, 247, 0.28);
+            box-shadow: 0 16px 38px -16px rgba(0, 0, 0, 0.75), 0 0 22px -8px rgba(168, 85, 247, 0.25);
         }
-        .admin-surface {
-            background: rgba(255, 255, 255, 0.96);
-            border: 1px solid rgba(15, 23, 42, 0.08);
-            box-shadow: 0 8px 22px -12px rgba(15, 23, 42, 0.12);
-        }
-        .admin-input {
+        .neon-input {
             background: #f8fafc;
-            border: 1px solid #cbd5e1;
-            transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+            border: 1px solid rgba(148, 163, 184, 0.45);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
-        .admin-input:focus {
+        .neon-input:focus {
             outline: none;
-            background: #ffffff;
-            border-color: #7c3aed;
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.14);
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
         }
-        .btn-grad {
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 60%, #c026d3 100%);
-            box-shadow: 0 8px 18px -6px rgba(124, 58, 237, 0.45);
-            transition: transform 0.15s ease, filter 0.15s ease;
+        html.dark .neon-input {
+            background: #090c15;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            color: #f8fafc;
         }
-        .btn-grad:hover {
-            filter: brightness(1.05);
+        html.dark .neon-input:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.28);
         }
-        .btn-grad:active {
-            transform: scale(0.98);
+        .neon-btn {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 55%, #c026d3 100%);
+            box-shadow: 0 10px 24px -8px rgba(124, 58, 237, 0.5);
+            transition: transform 0.15s ease, filter 0.15s ease, opacity 0.15s ease;
         }
-        .logo-frame {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #ffffff;
+        .neon-btn:hover:not(:disabled) {
+            filter: brightness(1.06);
         }
-        .logo-frame img {
-            width: 72%;
-            height: 72%;
-            object-fit: contain;
-            object-position: center center;
-            display: block;
-            margin: 0 auto;
+        .neon-btn:active:not(:disabled) {
+            transform: scale(0.985);
         }
-        .splash-apk {
-            position: fixed;
-            inset: 0;
-            z-index: 90;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            background: #ffffff;
-            transition: opacity 0.35s ease, visibility 0.35s ease;
+        .neon-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
-        .splash-apk.hide {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
-<body class="antialiased select-none">
-
-    <!-- Splash APK con logo centrado y ajustado -->
-    <div id="adminSplash" class="splash-apk" aria-hidden="true">
-        <div class="w-20 h-20 rounded-2xl border border-purple-200 shadow-lg logo-frame">
-            <img src="https://i.postimg.cc/t4fJptrQ/BCV-20261120-041842-0000.png" alt="Logo Yimmi Kambio">
-        </div>
-        <div class="text-center">
-            <div class="text-sm font-black text-slate-900">Yimmi Kambio · Admin</div>
-            <div class="text-[10px] font-mono font-bold text-purple-700">APK en tiempo real...</div>
-        </div>
+<body class="antialiased">
+    <!-- Toast -->
+    <div id="adminToast" class="fixed top-4 right-4 left-4 sm:left-auto z-50 hidden items-center gap-2 px-4 py-3 rounded-2xl bg-slate-950 text-white text-xs font-bold shadow-2xl border border-purple-500/40">
+        <i id="adminToastIcon" class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+        <span id="adminToastMsg">Listo</span>
     </div>
 
-    <!-- Toast de Estado -->
-    <div id="adminToast" class="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-slate-900 text-white text-[11px] font-bold shadow-2xl border border-slate-700 max-w-[90vw]">
-        <i id="adminToastIcon" class="fa-solid fa-circle-check text-emerald-400 text-xs shrink-0"></i>
-        <span id="adminToastText" class="truncate">Listo</span>
-    </div>
-
-    <!-- Modal de Confirmación Integrado -->
-    <div id="adminConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-        <div class="admin-surface rounded-3xl p-4 max-w-xs w-full space-y-3.5 text-center">
-            <h3 id="adminConfirmTitle" class="text-sm font-black text-slate-900">Confirmar acción</h3>
-            <p id="adminConfirmMsg" class="text-xs text-slate-600 leading-relaxed"></p>
-            <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="cerrarConfirmAdmin()" class="py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold cursor-pointer">Cancelar</button>
-                <button type="button" id="btnConfirmarAccionAdmin" class="py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold cursor-pointer">Eliminar</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="apk-shell">
-        <!-- Encabezado Superior Estilo App Móvil -->
-        <header class="admin-surface border-b px-3 py-2.5 space-y-2 relative z-30 shrink-0">
-            <div class="flex items-center justify-between gap-2">
-                <a href="/" data-admin-route="/" class="flex items-center gap-2.5 min-w-0">
-                    <div class="w-9 h-9 rounded-xl border border-slate-200 shrink-0 shadow-2xs logo-frame">
-                        <img src="https://i.postimg.cc/t4fJptrQ/BCV-20261120-041842-0000.png" alt="Logo Yimmi Kambio">
+    <div class="admin-shell px-3.5 py-4 space-y-4">
+        <!-- Encabezado -->
+        <header class="neon-card rounded-2xl px-4 py-3 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-white p-1 border border-purple-300/60 flex items-center justify-center shrink-0">
+                    <img src="https://i.postimg.cc/t4fJptrQ/BCV-20261120-041842-0000.png" alt="Logo Yimmi Kambio" class="w-full h-full object-contain bg-white">
+                </div>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                        <h1 class="text-sm sm:text-base font-black truncate">Yimmi Kambio Admin</h1>
+                        <span class="px-1.5 py-0.5 rounded-md bg-purple-500/15 border border-purple-400/40 text-purple-700 dark:text-purple-300 text-[10px] font-mono font-extrabold">v2</span>
                     </div>
-                    <div class="min-w-0">
-                        <div class="flex items-center gap-1.5">
-                            <h1 class="text-sm font-black text-slate-900 truncate">Yimmi Kambio · Admin</h1>
-                            <span class="px-1.5 py-0.5 rounded-md bg-purple-50 border border-purple-200 text-purple-700 text-[9px] font-mono font-extrabold">APK</span>
-                        </div>
-                        <p id="rutaActualLabel" class="text-[10px] font-mono text-purple-700 font-bold truncate">/</p>
-                    </div>
-                </a>
-
-                <div class="flex items-center gap-1.5 shrink-0">
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9px] font-mono font-extrabold">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span>LIVE</span>
-                    </span>
-
-                    <button type="button" id="btnMenuAdmin" onclick="alternarMenuAdmin()" aria-expanded="false" aria-controls="panelMenuAdmin" aria-label="Abrir menú de navegación" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-800 flex items-center justify-center cursor-pointer transition">
-                        <i id="iconoMenuAdmin" class="fa-solid fa-bars text-xs"></i>
-                    </button>
+                    <p class="text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate">yimmi-kambio-v2-default-rtdb</p>
                 </div>
             </div>
 
-            <!-- Panel Desplegable del Menú -->
-            <nav id="panelMenuAdmin" class="hidden pt-2 border-t border-slate-100 space-y-1.5">
-                <div class="grid grid-cols-1 gap-1.5 text-xs font-extrabold">
-                    <a href="/" data-admin-route="/" onclick="cerrarMenuAdmin()" class="px-3 py-2 rounded-xl bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-300 text-slate-800 flex items-center justify-between transition">
-                        <span class="flex items-center gap-2">
-                            <i class="fa-solid fa-house text-purple-600"></i>
-                            <span>Inicio (/config)</span>
-                        </span>
-                        <span class="font-mono text-[10px] text-slate-400">/</span>
-                    </a>
-
-                    <a href="/publicar-tasas" data-admin-route="/publicar-tasas" onclick="cerrarMenuAdmin()" class="px-3 py-2 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-800 flex items-center justify-between transition">
-                        <span class="flex items-center gap-2">
-                            <i class="fa-solid fa-cloud-arrow-up text-blue-600"></i>
-                            <span>Publicar nuevas tasas</span>
-                        </span>
-                        <span class="font-mono text-[10px] text-slate-400">/publicar-tasas</span>
-                    </a>
-
-                    <a href="/historial-tasas" data-admin-route="/historial-tasas" onclick="cerrarMenuAdmin()" class="px-3 py-2 rounded-xl bg-slate-50 hover:bg-fuchsia-50 border border-slate-200 hover:border-fuchsia-300 text-slate-800 flex items-center justify-between transition">
-                        <span class="flex items-center gap-2">
-                            <i class="fa-solid fa-clock-rotate-left text-fuchsia-600"></i>
-                            <span>Historial (/historialTasas)</span>
-                        </span>
-                        <span class="font-mono text-[10px] text-slate-400">/historial-tasas</span>
-                    </a>
-                </div>
-            </nav>
+            <div class="flex items-center gap-1.5 shrink-0">
+                <span id="dbStatusBadge" class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/15 border border-amber-400/40 text-amber-700 dark:text-amber-300 text-[10px] font-mono font-bold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    <span>SYNC</span>
+                </span>
+                <button type="button" onclick="toggleDarkAdmin()" class="w-8 h-8 rounded-xl neon-input flex items-center justify-center text-xs cursor-pointer" title="Cambiar modo claro/oscuro">
+                    <i id="iconDarkAdmin" class="fa-solid fa-moon text-purple-600 dark:text-amber-300"></i>
+                </button>
+            </div>
         </header>
 
-        <!-- Área Desplazable de Contenido -->
-        <div class="apk-scroll space-y-3.5">
-            <!-- Bloqueo de Acceso -->
-            <section id="bloqueoAcceso" class="admin-surface rounded-3xl p-4 space-y-3.5">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-700 shrink-0">
-                        <i class="fa-solid fa-lock text-xs"></i>
+        <!-- Contenido Principal -->
+        <main class="flex-1 space-y-4">
+            <!-- Resumen Actual en Firebase -->
+            <section class="neon-card rounded-3xl p-4 space-y-3">
+                <div class="flex items-center justify-between text-[11px]">
+                    <span class="font-mono font-extrabold uppercase tracking-wider text-purple-700 dark:text-purple-300">Tasas actuales en Firebase</span>
+                    <span id="adminLastSync" class="font-mono text-slate-500 dark:text-slate-400">--:--</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 font-mono text-center">
+                    <div class="neon-input rounded-2xl p-2.5">
+                        <div class="text-[10px] font-sans font-extrabold text-blue-700 dark:text-blue-300">DÓLAR BCV</div>
+                        <div id="liveTasaBcv" class="text-sm font-black mt-0.5">919,82</div>
                     </div>
-                    <div>
-                        <h2 class="text-sm font-black text-slate-900">Acceso al panel APK</h2>
-                        <p class="text-[11px] text-slate-600">Ingresa tu clave para gestionar tasas e historial en vivo.</p>
+                    <div class="neon-input rounded-2xl p-2.5">
+                        <div class="text-[10px] font-sans font-extrabold text-purple-700 dark:text-purple-300">EURO BCV</div>
+                        <div id="liveTasaEur" class="text-sm font-black mt-0.5">1.011,18</div>
+                    </div>
+                    <div class="neon-input rounded-2xl p-2.5">
+                        <div class="text-[10px] font-sans font-extrabold text-pink-700 dark:text-pink-300">USDT</div>
+                        <div id="liveTasaUsdt" class="text-sm font-black mt-0.5">1.076,91</div>
                     </div>
                 </div>
 
-                <form onsubmit="desbloquearPanel(event)" class="space-y-2.5">
-                    <input type="password" id="claveAccesoInput" required placeholder="Clave (por defecto: yimmi2026)" class="w-full admin-input rounded-2xl px-3.5 py-2.5 text-xs font-mono">
-                    <button type="submit" class="w-full btn-grad text-white text-xs font-extrabold py-2.5 px-4 rounded-2xl cursor-pointer flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-unlock-keyhole"></i>
-                        <span>Desbloquear panel</span>
-                    </button>
-                </form>
+                <!-- Referencia P2P reportada en config -->
+                <div id="p2pInfoBox" class="neon-input rounded-2xl px-3 py-2 flex items-center justify-between gap-2 text-[11px] font-mono">
+                    <span class="text-slate-500 dark:text-slate-400">Binance P2P (config):</span>
+                    <span id="p2pDetalleTexto" class="font-bold text-slate-800 dark:text-slate-200 truncate">Sin datos P2P aún</span>
+                </div>
             </section>
 
-            <!-- Panel Principal -->
-            <main id="panelAdminContenido" class="hidden space-y-3.5">
-                <!-- Vista / Ruta Inicio (/): Cotizaciones activas (/config) -->
-                <section id="secCotizacionesActuales" class="admin-surface rounded-3xl p-3.5 space-y-3">
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-purple-600"></span>
-                            <span class="text-[11px] font-black uppercase tracking-wider text-slate-800">Tasas activas (/config)</span>
-                        </div>
-                        <a href="/publicar-tasas" data-admin-route="/publicar-tasas" class="px-2.5 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 text-[10px] font-extrabold transition">
-                            Editar tasas →
-                        </a>
+            <!-- Formulario para Actualizar Tasas -->
+            <form id="formActualizarTasas" onsubmit="guardarTasasEnFirebase(event)" class="neon-card rounded-3xl p-4 sm:p-5 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 pb-3">
+                    <div>
+                        <span class="text-[10px] font-mono font-extrabold uppercase tracking-wider text-blue-700 dark:text-blue-300">Control Manual</span>
+                        <h2 class="text-base font-black">Actualizar Tasas (Bs.)</h2>
                     </div>
-
-                    <div class="grid grid-cols-1 gap-2 font-mono">
-                        <div class="rounded-2xl p-3 bg-blue-50/80 border border-blue-200/80 flex items-center justify-between">
-                            <span class="text-[11px] font-sans font-extrabold uppercase tracking-wider text-blue-800">Dólar BCV</span>
-                            <span id="actualUsd" class="text-base font-extrabold text-slate-900">--</span>
-                        </div>
-
-                        <div class="rounded-2xl p-3 bg-purple-50/80 border border-purple-200/80 flex items-center justify-between">
-                            <span class="text-[11px] font-sans font-extrabold uppercase tracking-wider text-purple-800">Euro BCV</span>
-                            <span id="actualEur" class="text-base font-extrabold text-slate-900">--</span>
-                        </div>
-
-                        <div class="rounded-2xl p-3 bg-fuchsia-50/80 border border-fuchsia-200/80 flex items-center justify-between">
-                            <span class="text-[11px] font-sans font-extrabold uppercase tracking-wider text-fuchsia-800">USDT</span>
-                            <span id="actualUsdt" class="text-base font-extrabold text-slate-900">--</span>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Vista / Ruta /publicar-tasas: Publicar nuevas tasas -->
-                <form id="secPublicarTasas" onsubmit="guardarTasasFirebase(event)" class="hidden admin-surface rounded-3xl p-4 space-y-3">
-                    <div class="border-b border-slate-100 pb-2.5 flex items-center justify-between gap-2">
-                        <div>
-                            <span class="text-[9px] font-mono font-bold uppercase tracking-wider text-blue-700">/publicar-tasas</span>
-                            <h2 class="text-sm font-black text-slate-900">Publicar nuevas tasas</h2>
-                            <p class="text-[11px] text-slate-500">Actualiza la app y la web al instante</p>
-                        </div>
-                        <i class="fa-solid fa-bolt text-purple-600 text-sm"></i>
-                    </div>
-
-                    <div class="space-y-2.5">
-                        <div>
-                            <label for="inputTasaBcv" class="block text-[11px] font-extrabold text-slate-700 mb-1">Dólar BCV (Bs.)</label>
-                            <input type="text" inputmode="decimal" id="inputTasaBcv" required placeholder="0.00" class="w-full admin-input rounded-2xl px-3 py-2 text-sm font-mono font-extrabold text-slate-900">
-                        </div>
-
-                        <div>
-                            <label for="inputTasaEuroBcv" class="block text-[11px] font-extrabold text-slate-700 mb-1">Euro BCV (Bs.)</label>
-                            <input type="text" inputmode="decimal" id="inputTasaEuroBcv" required placeholder="0.00" class="w-full admin-input rounded-2xl px-3 py-2 text-sm font-mono font-extrabold text-slate-900">
-                        </div>
-
-                        <div>
-                            <label for="inputTasaUsdt" class="block text-[11px] font-extrabold text-slate-700 mb-1">USDT (Bs.)</label>
-                            <input type="text" inputmode="decimal" id="inputTasaUsdt" required placeholder="0.00" class="w-full admin-input rounded-2xl px-3 py-2 text-sm font-mono font-extrabold text-slate-900">
-                        </div>
-                    </div>
-
-                    <div class="rounded-2xl p-3 bg-slate-50 border border-slate-200/90 space-y-2">
-                        <label class="flex items-center gap-2 text-[11px] font-extrabold text-slate-800 cursor-pointer">
-                            <input type="checkbox" id="chkGuardarHistorial" checked class="w-4 h-4 accent-purple-600 rounded cursor-pointer">
-                            <span>Registrar en /historialTasas</span>
-                        </label>
-
-                        <div class="flex items-center justify-between gap-2">
-                            <label for="inputFechaHistorial" class="text-[11px] font-bold text-slate-600">Fecha:</label>
-                            <input type="date" id="inputFechaHistorial" required class="admin-input rounded-xl px-2.5 py-1 text-xs font-mono font-bold text-slate-900">
-                        </div>
-                    </div>
-
-                    <button type="submit" id="btnGuardarTasas" class="w-full py-3 px-4 rounded-2xl btn-grad text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                        <span>Publicar tasas ahora</span>
+                    <button type="button" onclick="cargarValoresActualesEnInputs(true)" class="px-2.5 py-1.5 rounded-xl neon-input text-[11px] font-bold text-purple-700 dark:text-purple-300 cursor-pointer" title="Restaurar valores actuales de Firebase">
+                        <i class="fa-solid fa-rotate-left mr-1"></i>Cargar actuales
                     </button>
-                </form>
+                </div>
 
-                <!-- Vista / Ruta /historial-tasas: Editor en Tiempo Real del Historial (/historialTasas) -->
-                <section id="secHistorialTasas" class="hidden admin-surface rounded-3xl p-3.5 space-y-3">
-                    <div class="border-b border-slate-100 pb-2.5 space-y-2">
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="text-[9px] font-mono font-bold uppercase tracking-wider text-fuchsia-700">/historialTasas</span>
-                            <span id="indicadorLiveHist" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9px] font-mono font-extrabold">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                                <span>TIEMPO REAL</span>
-                            </span>
-                        </div>
-                        <div>
-                            <h2 class="text-sm font-black text-slate-900">Historial en tiempo real</h2>
-                            <p id="subtituloOrigenHist" class="text-[10px] text-slate-500">Escuchando cambios en vivo</p>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
-                            <button type="button" id="tabHistUsd" onclick="cambiarMonedaHistorialAdmin('usd')" class="px-2 py-1.5 rounded-lg text-[10px] font-black bg-white text-slate-900 shadow-2xs cursor-pointer transition">BCV (USD)</button>
-                            <button type="button" id="tabHistEur" onclick="cambiarMonedaHistorialAdmin('eur')" class="px-2 py-1.5 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition">Euro (EUR)</button>
-                            <button type="button" id="tabHistUsdt" onclick="cambiarMonedaHistorialAdmin('usdt')" class="px-2 py-1.5 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition">USDT</button>
-                        </div>
-                    </div>
-
-                    <!-- Agregar o Actualizar Fecha Directamente en Tiempo Real -->
-                    <form onsubmit="guardarRegistroManualTiempoReal(event)" class="rounded-2xl p-2.5 bg-purple-50/70 border border-purple-200/80 space-y-2">
-                        <div class="grid grid-cols-2 gap-1.5">
-                            <div>
-                                <label for="inputNuevaFechaHist" class="block text-[9px] font-extrabold uppercase text-purple-900 mb-0.5">Fecha</label>
-                                <input type="date" id="inputNuevaFechaHist" required class="w-full admin-input rounded-xl px-2 py-1.5 text-[11px] font-mono font-bold text-slate-900">
-                            </div>
-                            <div>
-                                <label for="inputNuevoValorHist" class="block text-[9px] font-extrabold uppercase text-purple-900 mb-0.5">Valor (Bs.)</label>
-                                <input type="text" inputmode="decimal" id="inputNuevoValorHist" required placeholder="0.00" class="w-full admin-input rounded-xl px-2 py-1.5 text-[11px] font-mono font-extrabold text-right text-slate-900">
-                            </div>
-                        </div>
-                        <button type="submit" class="w-full py-2 px-3 rounded-xl btn-grad text-white text-[11px] font-extrabold flex items-center justify-center gap-1.5 cursor-pointer">
-                            <i class="fa-solid fa-plus-circle"></i>
-                            <span>Guardar / Actualizar fecha</span>
-                        </button>
-                    </form>
-
-                    <!-- Controles de Selección y Acciones -->
-                    <div class="space-y-1.5 rounded-2xl p-2 bg-slate-50 border border-slate-200/90 text-[11px]">
-                        <label class="flex items-center gap-2 px-1 font-extrabold text-slate-700 cursor-pointer">
-                            <input type="checkbox" id="chkSeleccionarTodosHist" onchange="alternarSeleccionTodosHist(this.checked)" class="w-4 h-4 accent-purple-600 rounded cursor-pointer">
-                            <span>Seleccionar todos</span>
+                <div class="space-y-3">
+                    <div>
+                        <label for="inputTasaBcv" class="block text-xs font-extrabold text-slate-700 dark:text-slate-200 mb-1">
+                            Dólar BCV (tasaBcv)
                         </label>
-
-                        <div class="grid grid-cols-3 gap-1">
-                            <button type="button" onclick="cargarRegistrosBaseEnFirebase()" class="px-2 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-900 font-extrabold text-[10px] flex items-center justify-center gap-1 cursor-pointer transition">
-                                <i class="fa-solid fa-database"></i>
-                                <span>Base</span>
-                            </button>
-                            <button type="button" onclick="eliminarSeleccionadosHist()" class="px-2 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-extrabold text-[10px] flex items-center justify-center gap-1 cursor-pointer transition">
-                                <i class="fa-solid fa-trash-can"></i>
-                                <span>Borrar sel.</span>
-                            </button>
-                            <button type="button" onclick="eliminarTodoHistorialMoneda()" class="px-2 py-1.5 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-800 font-extrabold text-[10px] flex items-center justify-center gap-1 cursor-pointer transition">
-                                <i class="fa-solid fa-broom"></i>
-                                <span>Todo</span>
-                            </button>
+                        <div class="relative">
+                            <input type="text" inputmode="decimal" id="inputTasaBcv" required placeholder="919.82" class="w-full neon-input rounded-2xl px-3.5 py-2.5 pr-12 font-mono text-base font-extrabold">
+                            <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-slate-400">Bs.</span>
                         </div>
                     </div>
 
-                    <!-- Listado de Fechas y Tasas en Tiempo Real -->
-                    <div id="listaHistorialAdmin" class="space-y-1.5 max-h-64 overflow-y-auto pr-0.5">
-                        <div class="text-center text-xs text-slate-500 py-4">Conectando con historial en tiempo real...</div>
+                    <div>
+                        <label for="inputTasaEur" class="block text-xs font-extrabold text-slate-700 dark:text-slate-200 mb-1">
+                            Euro BCV (tasaEuroBcv)
+                        </label>
+                        <div class="relative">
+                            <input type="text" inputmode="decimal" id="inputTasaEur" required placeholder="1011.18" class="w-full neon-input rounded-2xl px-3.5 py-2.5 pr-12 font-mono text-base font-extrabold">
+                            <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-slate-400">Bs.</span>
+                        </div>
                     </div>
-                </section>
-            </main>
-        </div>
 
-        <!-- Barra Inferior Estilo App Móvil (APK) -->
-        <nav id="barraNavApk" class="admin-surface border-t px-2 py-1.5 grid grid-cols-3 gap-1 shrink-0 z-20">
-            <a href="/" data-admin-route="/" id="navApkInicio" class="py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-[10px] font-extrabold btn-grad text-white transition">
-                <i class="fa-solid fa-house text-xs"></i>
-                <span>Inicio</span>
-            </a>
-            <a href="/publicar-tasas" data-admin-route="/publicar-tasas" id="navApkPublicar" class="py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-[10px] font-extrabold text-slate-600 hover:bg-slate-100 transition">
-                <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
-                <span>Publicar</span>
-            </a>
-            <a href="/historial-tasas" data-admin-route="/historial-tasas" id="navApkHistorial" class="py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-[10px] font-extrabold text-slate-600 hover:bg-slate-100 transition">
-                <i class="fa-solid fa-clock-rotate-left text-xs"></i>
-                <span>Historial</span>
-            </a>
-        </nav>
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label for="inputTasaUsdt" class="text-xs font-extrabold text-slate-700 dark:text-slate-200">
+                                USDT (tasaUsdt)
+                            </label>
+                            <span class="text-[10px] font-mono text-slate-500 dark:text-slate-400">También se sincroniza cada hora vía P2P</span>
+                        </div>
+                        <div class="relative">
+                            <input type="text" inputmode="decimal" id="inputTasaUsdt" required placeholder="1076.91" class="w-full neon-input rounded-2xl px-3.5 py-2.5 pr-12 font-mono text-base font-extrabold">
+                            <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-slate-400">Bs.</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="inputFechaHistorial" class="block text-xs font-extrabold text-slate-700 dark:text-slate-200 mb-1">
+                            Fecha para registrar en historialTasas
+                        </label>
+                        <input type="date" id="inputFechaHistorial" required class="w-full neon-input rounded-2xl px-3.5 py-2.5 font-mono text-xs font-bold">
+                    </div>
+                </div>
+
+                <label class="flex items-center gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer pt-1">
+                    <input type="checkbox" id="chkGuardarHistorial" checked class="w-4 h-4 rounded accent-purple-600">
+                    <span>Guardar también en <code class="font-mono text-[11px] bg-slate-200/80 dark:bg-white/10 px-1.5 py-0.5 rounded">historialTasas</code> para la fecha elegida</span>
+                </label>
+
+                <button type="submit" id="btnGuardarTasas" class="w-full py-3.5 px-5 rounded-2xl neon-btn text-white text-sm font-extrabold flex items-center justify-center gap-2 cursor-pointer">
+                    <i id="btnGuardarIcon" class="fa-solid fa-cloud-arrow-up"></i>
+                    <span id="btnGuardarTexto">Publicar Tasas en yimmi-kambio-v2</span>
+                </button>
+            </form>
+        </main>
+
+        <!-- Pie -->
+        <footer class="text-center text-[11px] font-mono text-slate-500 dark:text-slate-400 pt-2">
+            Yimmi Kambio Admin · Conectado a yimmi-kambio-v2
+        </footer>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
-        import { getDatabase, ref, onValue, update, set, remove } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-database.js";
-
-        const CLAVE_PANEL_LOCAL = "yimmi2026";
-        const STORAGE_DESBLOQUEO = "yimmi_kambio_admin_unlocked";
-
-        const RUTAS_ADMIN_VALIDAS = ["/", "/publicar-tasas", "/historial-tasas"];
-
-        const HISTORIAL_BASE_ADMIN = {
-            usd: [
-                { fecha: "2026-10-21", valor: 883.40 },
-                { fecha: "2026-10-22", valor: 884.75 },
-                { fecha: "2026-10-23", valor: 886.23 },
-                { fecha: "2026-10-26", valor: 887.30 },
-                { fecha: "2026-10-28", valor: 888.12 },
-                { fecha: "2026-10-29", valor: 888.89 },
-                { fecha: "2026-10-30", valor: 889.26 },
-                { fecha: "2026-11-02", valor: 889.58 },
-                { fecha: "2026-11-03", valor: 891.11 },
-                { fecha: "2026-11-04", valor: 893.22 },
-                { fecha: "2026-11-05", valor: 894.89 },
-                { fecha: "2026-11-06", valor: 896.12 },
-                { fecha: "2026-11-09", valor: 897.54 },
-                { fecha: "2026-11-10", valor: 899.27 },
-                { fecha: "2026-11-11", valor: 901.62 },
-                { fecha: "2026-11-12", valor: 904.45 },
-                { fecha: "2026-11-13", valor: 911.62 },
-                { fecha: "2026-11-16", valor: 914.02 },
-                { fecha: "2026-11-17", valor: 915.75 },
-                { fecha: "2026-11-18", valor: 916.65 },
-                { fecha: "2026-11-19", valor: 917.78 },
-                { fecha: "2026-11-20", valor: 918.77 },
-                { fecha: "2026-11-23", valor: 919.82 }
-            ],
-            eur: [
-                { fecha: "2026-10-21", valor: 993.18 },
-                { fecha: "2026-10-22", valor: 993.21 },
-                { fecha: "2026-10-23", valor: 993.09 },
-                { fecha: "2026-10-26", valor: 994.04 },
-                { fecha: "2026-10-28", valor: 989.72 },
-                { fecha: "2026-10-29", valor: 989.39 },
-                { fecha: "2026-10-30", valor: 992.80 },
-                { fecha: "2026-11-02", valor: 991.25 },
-                { fecha: "2026-11-03", valor: 997.92 },
-                { fecha: "2026-11-04", valor: 999.77 },
-                { fecha: "2026-11-05", valor: 1006.03 },
-                { fecha: "2026-11-06", valor: 1004.96 },
-                { fecha: "2026-11-09", valor: 1001.19 },
-                { fecha: "2026-11-10", valor: 1006.61 },
-                { fecha: "2026-11-11", valor: 1007.96 },
-                { fecha: "2026-11-12", valor: 1003.49 },
-                { fecha: "2026-11-13", valor: 1009.34 },
-                { fecha: "2026-11-16", valor: 1010.56 },
-                { fecha: "2026-11-17", valor: 1008.31 },
-                { fecha: "2026-11-18", valor: 1007.39 },
-                { fecha: "2026-11-19", valor: 1007.40 },
-                { fecha: "2026-11-20", valor: 1009.07 },
-                { fecha: "2026-11-23", valor: 1011.18 }
-            ],
-            usdt: [
-                { fecha: "2026-10-23", valor: 1002.11 },
-                { fecha: "2026-10-24", valor: 1003.92 },
-                { fecha: "2026-10-25", valor: 1005.50 },
-                { fecha: "2026-10-26", valor: 999.05 },
-                { fecha: "2026-10-27", valor: 1003.82 },
-                { fecha: "2026-10-28", valor: 1004.69 },
-                { fecha: "2026-10-29", valor: 998.00 },
-                { fecha: "2026-10-30", valor: 990.62 },
-                { fecha: "2026-10-31", valor: 980.00 },
-                { fecha: "2026-11-01", valor: 993.61 },
-                { fecha: "2026-11-02", valor: 997.50 },
-                { fecha: "2026-11-03", valor: 1006.00 },
-                { fecha: "2026-11-04", valor: 1008.99 },
-                { fecha: "2026-11-05", valor: 1010.90 },
-                { fecha: "2026-11-06", valor: 1024.19 },
-                { fecha: "2026-11-07", valor: 1033.30 },
-                { fecha: "2026-11-08", valor: 1033.32 },
-                { fecha: "2026-11-09", valor: 1054.00 },
-                { fecha: "2026-11-10", valor: 1076.31 },
-                { fecha: "2026-11-11", valor: 1075.11 },
-                { fecha: "2026-11-12", valor: 1073.65 },
-                { fecha: "2026-11-13", valor: 1071.30 },
-                { fecha: "2026-11-14", valor: 1071.00 },
-                { fecha: "2026-11-15", valor: 1075.00 },
-                { fecha: "2026-11-16", valor: 1066.00 },
-                { fecha: "2026-11-17", valor: 1066.01 },
-                { fecha: "2026-11-18", valor: 1072.50 },
-                { fecha: "2026-11-19", valor: 1064.00 },
-                { fecha: "2026-11-20", valor: 1078.70 },
-                { fecha: "2026-11-21", valor: 1076.91 }
-            ]
-        };
+        import { getDatabase, ref, onValue, update, set } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-database.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyAee29RNZa3A-C-8APC1x_yMzViMgR7bBA",
-            authDomain: "futuro-ahora.firebaseapp.com",
-            databaseURL: "https://futuro-ahora-default-rtdb.firebaseio.com",
-            projectId: "futuro-ahora",
-            storageBucket: "futuro-ahora.firebasestorage.app",
-            messagingSenderId: "727564715444",
-            appId: "1:727564715444:web:0c4d66d7c2260daaeddee1",
-            measurementId: "G-EDDTRWG6VV"
+            apiKey: "AIzaSyBgCfc-u07l4NhgBaQbhqK7hB1aL3aSrLo",
+            authDomain: "yimmi-kambio-v2.firebaseapp.com",
+            databaseURL: "https://yimmi-kambio-v2-default-rtdb.firebaseio.com",
+            projectId: "yimmi-kambio-v2",
+            storageBucket: "yimmi-kambio-v2.firebasestorage.app",
+            messagingSenderId: "386152088368",
+            appId: "1:386152088368:web:d304a246e3233c6115bef5",
+            measurementId: "G-NELTYTR97J"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        let monedaHistorialActual = "usd";
-        let registrosHistorialActual = [];
-        let rutaAdminActiva = "/";
+        let ultimasTasas = {
+            tasaBcv: 919.82,
+            tasaEuroBcv: 1011.18,
+            tasaUsdt: 1076.91
+        };
+
         let toastTimer = null;
-        let accionConfirmPendiente = null;
-        let unsubscribeHistorialLive = null;
-        let listenersConfigActivos = false;
 
-        function normalizarClaveFechaISO(rawFecha) {
-            if (!rawFecha) return "";
-            const limpia = String(rawFecha).trim();
-            const isoMatch = limpia.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
-            if (isoMatch) {
-                return `${isoMatch[1]}-${String(isoMatch[2]).padStart(2, "0")}-${String(isoMatch[3]).padStart(2, "0")}`;
-            }
-            const veMatch = limpia.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})$/);
-            if (veMatch) {
-                const anio = veMatch[3].length === 2 ? `20${veMatch[3]}` : veMatch[3];
-                return `${anio}-${String(veMatch[2]).padStart(2, "0")}-${String(veMatch[1]).padStart(2, "0")}`;
-            }
-            const dt = new Date(limpia);
-            if (!isNaN(dt.getTime())) {
-                return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
-            }
-            return limpia;
-        }
-
-        function fechaClaveATimestamp(clave) {
-            const iso = normalizarClaveFechaISO(clave);
-            const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-            if (m) {
-                return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0).getTime();
-            }
-            return 0;
-        }
-
-        function ordenarRegistrosCronologicamente(lista) {
-            return [...lista].sort((a, b) => {
-                const tsA = fechaClaveATimestamp(a.key);
-                const tsB = fechaClaveATimestamp(b.key);
-                if (tsA !== tsB) return tsB - tsA;
-                return String(b.key).localeCompare(String(a.key));
-            });
-        }
-
-        async function marcarSincronizacionHistorial(moneda) {
-            await set(ref(db, "historialTasas/ultimaSincronizacion"), {
-                moneda,
-                fecha: new Date().toISOString()
-            });
-        }
-
-        window.cerrarConfirmAdmin = function() {
-            accionConfirmPendiente = null;
-            const modal = document.getElementById("adminConfirmModal");
-            if (modal) {
-                modal.classList.add("hidden");
-                modal.classList.remove("flex");
-            }
-        };
-
-        function abrirConfirmAdmin(titulo, mensaje, onAceptar) {
-            accionConfirmPendiente = onAceptar;
-            const modal = document.getElementById("adminConfirmModal");
-            const tEl = document.getElementById("adminConfirmTitle");
-            const mEl = document.getElementById("adminConfirmMsg");
-            if (tEl) tEl.textContent = titulo;
-            if (mEl) mEl.textContent = mensaje;
-            if (modal) {
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
-            }
-        }
-
-        document.getElementById("btnConfirmarAccionAdmin")?.addEventListener("click", async () => {
-            const fn = accionConfirmPendiente;
-            window.cerrarConfirmAdmin();
-            if (typeof fn === "function") await fn();
-        });
-
-        function normalizarRutaAdmin(pathname) {
-            if (!pathname) return "/";
-            const limpia = pathname.replace(/\/+$/, "") || "/";
-            if (RUTAS_ADMIN_VALIDAS.includes(limpia)) return limpia;
-            if (limpia.endsWith("/publicar-tasas")) return "/publicar-tasas";
-            if (limpia.endsWith("/historial-tasas")) return "/historial-tasas";
-            return "/";
-        }
-
-        function actualizarEstilosNavInferior(rutaLimpia) {
-            const mapaNav = {
-                "/": "navApkInicio",
-                "/publicar-tasas": "navApkPublicar",
-                "/historial-tasas": "navApkHistorial"
-            };
-            Object.entries(mapaNav).forEach(([r, id]) => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                if (r === rutaLimpia) {
-                    el.className = "py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-[10px] font-extrabold btn-grad text-white transition";
-                } else {
-                    el.className = "py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 text-[10px] font-extrabold text-slate-600 hover:bg-slate-100 transition";
-                }
-            });
-        }
-
-        function aplicarVistaPorRuta(ruta, push = true) {
-            const rutaLimpia = normalizarRutaAdmin(ruta);
-            rutaAdminActiva = rutaLimpia;
-
-            if (push && window.location.pathname !== rutaLimpia) {
-                try {
-                    window.history.pushState({ adminRoute: rutaLimpia }, "", rutaLimpia);
-                } catch (e) {}
-            }
-
-            const labelRuta = document.getElementById("rutaActualLabel");
-            if (labelRuta) {
-                labelRuta.textContent = rutaLimpia;
-            }
-
-            actualizarEstilosNavInferior(rutaLimpia);
-
-            const secActuales = document.getElementById("secCotizacionesActuales");
-            const secPublicar = document.getElementById("secPublicarTasas");
-            const secHistorial = document.getElementById("secHistorialTasas");
-
-            if (rutaLimpia === "/publicar-tasas") {
-                secActuales?.classList.add("hidden");
-                secPublicar?.classList.remove("hidden");
-                secHistorial?.classList.add("hidden");
-            } else if (rutaLimpia === "/historial-tasas") {
-                secActuales?.classList.add("hidden");
-                secPublicar?.classList.add("hidden");
-                secHistorial?.classList.remove("hidden");
-            } else {
-                secActuales?.classList.remove("hidden");
-                secPublicar?.classList.add("hidden");
-                secHistorial?.classList.add("hidden");
-            }
-        }
-
-        window.irARutaAdmin = function(ruta, push = true) {
-            aplicarVistaPorRuta(ruta, push);
-        };
-
-        window.setEstadoMenuAdmin = function(abierto) {
-            const panel = document.getElementById("panelMenuAdmin");
-            const btn = document.getElementById("btnMenuAdmin");
-            const icono = document.getElementById("iconoMenuAdmin");
-            if (!panel || !btn || !icono) return;
-            panel.classList.toggle("hidden", !abierto);
-            btn.setAttribute("aria-expanded", String(abierto));
-            icono.classList.toggle("fa-bars", !abierto);
-            icono.classList.toggle("fa-xmark", abierto);
-        };
-
-        window.alternarMenuAdmin = function() {
-            const btn = document.getElementById("btnMenuAdmin");
-            const abierto = btn?.getAttribute("aria-expanded") === "true";
-            window.setEstadoMenuAdmin(!abierto);
-        };
-
-        window.cerrarMenuAdmin = function() {
-            window.setEstadoMenuAdmin(false);
-        };
-
-        document.addEventListener("click", (e) => {
-            const link = e.target.closest("a[data-admin-route]");
-            if (link && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
-                e.preventDefault();
-                aplicarVistaPorRuta(link.getAttribute("data-admin-route"), true);
-                return;
-            }
-            const panel = document.getElementById("panelMenuAdmin");
-            if (panel && !panel.classList.contains("hidden")) {
-                if (!e.target.closest("#panelMenuAdmin") && !e.target.closest("#btnMenuAdmin")) {
-                    window.cerrarMenuAdmin();
-                }
-            }
-        });
-
-        window.addEventListener("popstate", () => {
-            aplicarVistaPorRuta(window.location.pathname, false);
-        });
-
-        function mostrarAviso(texto, esError = false) {
-            const toast = document.getElementById("adminToast");
-            const msg = document.getElementById("adminToastText");
-            const icon = document.getElementById("adminToastIcon");
-            if (!toast || !msg || !icon) return;
-            msg.textContent = texto;
-            icon.className = esError
-                ? "fa-solid fa-circle-exclamation text-rose-400 text-xs shrink-0"
-                : "fa-solid fa-circle-check text-emerald-400 text-xs shrink-0";
-            toast.classList.remove("hidden");
-            toast.classList.add("flex");
+        function mostrarToast(msg, ok = true) {
+            const box = document.getElementById('adminToast');
+            const text = document.getElementById('adminToastMsg');
+            const icon = document.getElementById('adminToastIcon');
+            if (!box || !text || !icon) return;
+            text.textContent = msg;
+            icon.className = ok
+                ? 'fa-solid fa-circle-check text-emerald-400 text-sm'
+                : 'fa-solid fa-circle-exclamation text-rose-400 text-sm';
+            box.classList.remove('hidden');
+            box.classList.add('flex');
             if (toastTimer) clearTimeout(toastTimer);
             toastTimer = setTimeout(() => {
-                toast.classList.add("hidden");
-                toast.classList.remove("flex");
-            }, 2600);
+                box.classList.add('hidden');
+                box.classList.remove('flex');
+            }, 2800);
         }
 
-        function parseNumero(raw) {
+        function formatComa(num) {
+            const n = Number(num);
+            if (!Number.isFinite(n)) return '0,00';
+            return n.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+        }
+
+        function parseNum(raw) {
             if (raw === undefined || raw === null) return NaN;
-            const limpio = String(raw).trim().replace(/\s+/g, "").replace(",", ".");
-            return parseFloat(limpio);
-        }
+            let s = String(raw).trim().replace(/\s+/g, '').replace(/[^0-9.,-]/g, '');
+            if (!s) return NaN;
 
-        function fmtDisplay(n) {
-            const val = parseFloat(n);
-            if (isNaN(val)) return "--";
-            return val.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
+            const lastComma = s.lastIndexOf(',');
+            const lastDot = s.lastIndexOf('.');
 
-        function obtenerFechaHoyISO() {
-            const hoy = new Date();
-            const copia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
-            const diaSemana = hoy.getDay();
-            const hora = hoy.getHours();
-
-            if (diaSemana === 5 && hora >= 20) {
-                copia.setDate(copia.getDate() + 3);
-            } else if (diaSemana === 6) {
-                copia.setDate(copia.getDate() + 2);
-            } else if (diaSemana === 0) {
-                copia.setDate(copia.getDate() + 1);
-            }
-
-            const y = copia.getFullYear();
-            const m = String(copia.getMonth() + 1).padStart(2, "0");
-            const d = String(copia.getDate()).padStart(2, "0");
-            return `${y}-${m}-${d}`;
-        }
-
-        function actualizarEstilosTabsHist() {
-            const mapa = {
-                usd: "tabHistUsd",
-                eur: "tabHistEur",
-                usdt: "tabHistUsdt"
-            };
-            Object.entries(mapa).forEach(([key, id]) => {
-                const btn = document.getElementById(id);
-                if (!btn) return;
-                if (key === monedaHistorialActual) {
-                    btn.className = "px-2 py-1.5 rounded-lg text-[10px] font-black bg-white text-slate-900 shadow-2xs cursor-pointer transition";
+            if (lastComma > -1 && lastDot > -1) {
+                if (lastComma > lastDot) {
+                    s = s.replace(/\./g, '').replace(',', '.');
                 } else {
-                    btn.className = "px-2 py-1.5 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition";
+                    s = s.replace(/,/g, '');
                 }
-            });
-        }
-
-        function renderListaHistorialAdmin() {
-            const cont = document.getElementById("listaHistorialAdmin");
-            const chkAll = document.getElementById("chkSeleccionarTodosHist");
-            if (!cont) return;
-            if (chkAll) chkAll.checked = false;
-
-            if (!registrosHistorialActual.length) {
-                cont.innerHTML = `
-                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center text-[11px] text-slate-500">
-                        Sin registros en <strong>/historialTasas/${monedaHistorialActual}</strong>. Toca <strong>Base</strong> o agrega uno arriba.
-                    </div>
-                `;
-                return;
-            }
-
-            cont.innerHTML = registrosHistorialActual.map((item, idx) => `
-                <div class="bg-slate-50/90 hover:bg-white border border-slate-200/90 rounded-2xl px-2.5 py-1.5 flex items-center justify-between gap-1.5 transition">
-                    <div class="flex items-center gap-2 min-w-0">
-                        <input type="checkbox" data-hist-key="${encodeURIComponent(item.key)}" class="chk-hist-item w-3.5 h-3.5 accent-purple-600 rounded cursor-pointer shrink-0">
-                        <span class="text-[11px] font-mono font-bold text-slate-800 truncate">${item.key}</span>
-                    </div>
-
-                    <div class="flex items-center gap-1 shrink-0">
-                        <input type="text" inputmode="decimal" id="histVal_${idx}" value="${item.valor.toFixed(2)}" class="w-20 admin-input rounded-xl px-2 py-1 text-[11px] font-mono font-extrabold text-right text-slate-900">
-                        <button type="button" onclick="guardarEdicionRegistroHist(${idx})" class="w-7 h-7 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold flex items-center justify-center cursor-pointer transition" title="Guardar">
-                            <i class="fa-solid fa-check"></i>
-                        </button>
-                        <button type="button" onclick="eliminarUnRegistroHist(${idx})" class="w-7 h-7 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold flex items-center justify-center cursor-pointer transition" title="Eliminar">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join("");
-        }
-
-        function procesarSnapshotHistorial(raw, moneda) {
-            const lista = [];
-            let desdeFirebase = false;
-
-            if (raw && typeof raw === "object") {
-                if (Array.isArray(raw)) {
-                    raw.forEach((v, i) => {
-                        if (v !== null && v !== undefined) {
-                            const num = typeof v === "object" ? parseNumero(v.valor ?? v.tasa ?? v.monto) : parseNumero(v);
-                            const fechaKey = normalizarClaveFechaISO(typeof v === "object" ? (v.fecha || v.date || String(i)) : String(i));
-                            if (!isNaN(num) && num > 0 && fechaKey) {
-                                lista.push({ key: fechaKey, valor: num });
-                                desdeFirebase = true;
-                            }
-                        }
-                    });
-                } else {
-                    Object.entries(raw).forEach(([k, v]) => {
-                        if (k === "ultimaSincronizacion") return;
-                        const num = typeof v === "object" && v !== null ? parseNumero(v.valor ?? v.tasa ?? v.monto) : parseNumero(v);
-                        const fechaKey = normalizarClaveFechaISO(k);
-                        if (!isNaN(num) && num > 0 && fechaKey) {
-                            lista.push({ key: fechaKey, valor: num });
-                            desdeFirebase = true;
-                        }
-                    });
+            } else if (lastComma > -1) {
+                s = s.replace(',', '.');
+            } else if (lastDot > -1) {
+                const parts = s.split('.');
+                if (parts.length > 2) {
+                    const dec = parts.pop();
+                    s = parts.join('') + '.' + dec;
                 }
             }
 
-            registrosHistorialActual = lista.length > 0
-                ? ordenarRegistrosCronologicamente(lista)
-                : ordenarRegistrosCronologicamente(
-                    (HISTORIAL_BASE_ADMIN[moneda] || []).map(r => ({ key: normalizarClaveFechaISO(r.fecha), valor: r.valor }))
-                );
-
-            const sub = document.getElementById("subtituloOrigenHist");
-            if (sub) {
-                sub.textContent = desdeFirebase
-                    ? `En vivo · /historialTasas/${moneda} (${registrosHistorialActual.length})`
-                    : `Base precargada · ${moneda.toUpperCase()} (${registrosHistorialActual.length})`;
-            }
-
-            renderListaHistorialAdmin();
+            const parsed = Number(s);
+            return Number.isFinite(parsed) ? parsed : NaN;
         }
 
-        window.cargarHistorialAdmin = function(moneda = monedaHistorialActual) {
-            monedaHistorialActual = moneda;
-            actualizarEstilosTabsHist();
-
-            if (typeof unsubscribeHistorialLive === "function") {
-                unsubscribeHistorialLive();
-                unsubscribeHistorialLive = null;
-            }
-
-            const cont = document.getElementById("listaHistorialAdmin");
-            if (cont && !registrosHistorialActual.length) {
-                cont.innerHTML = `<div class="text-center text-xs text-slate-500 py-4">Conectando con historial en tiempo real...</div>`;
-            }
-
-            unsubscribeHistorialLive = onValue(
-                ref(db, `historialTasas/${moneda}`),
-                (snap) => {
-                    procesarSnapshotHistorial(snap.exists() ? snap.val() : null, moneda);
-                },
-                () => {
-                    procesarSnapshotHistorial(null, moneda);
-                    mostrarAviso("Sin conexión en vivo: mostrando base precargada", true);
-                }
-            );
-        };
-
-        window.guardarRegistroManualTiempoReal = async function(e) {
-            e.preventDefault();
-            const fechaIso = normalizarClaveFechaISO(document.getElementById("inputNuevaFechaHist")?.value);
-            const valorNum = parseNumero(document.getElementById("inputNuevoValorHist")?.value);
-
-            if (!fechaIso || isNaN(valorNum) || valorNum <= 0) {
-                mostrarAviso("Fecha o monto inválido", true);
-                return;
-            }
-
-            try {
-                await set(ref(db, `historialTasas/${monedaHistorialActual}/${fechaIso}`), Number(valorNum.toFixed(2)));
-                await marcarSincronizacionHistorial(monedaHistorialActual);
-                mostrarAviso(`Guardado ${fechaIso} (${valorNum.toFixed(2)} Bs.)`);
-            } catch (err) {
-                mostrarAviso("Error al guardar registro", true);
-            }
-        };
-
-        window.cargarRegistrosBaseEnFirebase = async function() {
-            const listaBase = HISTORIAL_BASE_ADMIN[monedaHistorialActual] || [];
-            if (!listaBase.length) return;
-            try {
-                const payloadLimpio = {};
-                listaBase.forEach(item => {
-                    const claveIso = normalizarClaveFechaISO(item.fecha);
-                    if (claveIso) {
-                        payloadLimpio[claveIso] = Number(parseFloat(item.valor).toFixed(2));
-                    }
-                });
-                await set(ref(db, `historialTasas/${monedaHistorialActual}`), payloadLimpio);
-                await marcarSincronizacionHistorial(monedaHistorialActual);
-                mostrarAviso(`Base de ${monedaHistorialActual.toUpperCase()} cargada`);
-            } catch (err) {
-                mostrarAviso("Error al cargar base", true);
-            }
-        };
-
-        window.cambiarMonedaHistorialAdmin = function(moneda) {
-            window.cargarHistorialAdmin(moneda);
-        };
-
-        window.guardarEdicionRegistroHist = async function(idx) {
-            const reg = registrosHistorialActual[idx];
-            if (!reg) return;
-            const input = document.getElementById(`histVal_${idx}`);
-            const nuevoVal = parseNumero(input?.value);
-            if (isNaN(nuevoVal) || nuevoVal <= 0) {
-                mostrarAviso("Monto inválido", true);
-                return;
-            }
-
-            try {
-                await set(ref(db, `historialTasas/${monedaHistorialActual}/${reg.key}`), Number(nuevoVal.toFixed(2)));
-                await marcarSincronizacionHistorial(monedaHistorialActual);
-                mostrarAviso(`Actualizado ${reg.key}`);
-            } catch (err) {
-                mostrarAviso("Error al editar", true);
-            }
-        };
-
-        window.eliminarUnRegistroHist = async function(idx) {
-            const reg = registrosHistorialActual[idx];
-            if (!reg) return;
-
-            try {
-                await remove(ref(db, `historialTasas/${monedaHistorialActual}/${reg.key}`));
-                await marcarSincronizacionHistorial(monedaHistorialActual);
-                mostrarAviso(`Eliminado ${reg.key}`);
-            } catch (err) {
-                mostrarAviso("Error al eliminar", true);
-            }
-        };
-
-        window.alternarSeleccionTodosHist = function(marcado) {
-            document.querySelectorAll(".chk-hist-item").forEach(chk => {
-                chk.checked = Boolean(marcado);
-            });
-        };
-
-        window.eliminarSeleccionadosHist = async function() {
-            const seleccionados = Array.from(document.querySelectorAll(".chk-hist-item:checked"))
-                .map(chk => decodeURIComponent(chk.getAttribute("data-hist-key") || ""))
-                .filter(Boolean);
-
-            if (!seleccionados.length) {
-                mostrarAviso("Selecciona al menos un registro", true);
-                return;
-            }
-
-            try {
-                await Promise.all(
-                    seleccionados.map(k => remove(ref(db, `historialTasas/${monedaHistorialActual}/${k}`)))
-                );
-                await marcarSincronizacionHistorial(monedaHistorialActual);
-                mostrarAviso(`Eliminados ${seleccionados.length} registros`);
-            } catch (err) {
-                mostrarAviso("Error al borrar seleccionados", true);
-            }
-        };
-
-        window.eliminarTodoHistorialMoneda = async function() {
-            abrirConfirmAdmin(
-                "Eliminar historial",
-                `¿Eliminar TODO el historial de ${monedaHistorialActual.toUpperCase()}?`,
-                async () => {
-                    try {
-                        await remove(ref(db, `historialTasas/${monedaHistorialActual}`));
-                        await marcarSincronizacionHistorial(monedaHistorialActual);
-                        mostrarAviso(`Historial de ${monedaHistorialActual.toUpperCase()} eliminado`);
-                    } catch (err) {
-                        mostrarAviso("Error al eliminar todo", true);
-                    }
-                }
-            );
-        };
-
-        function iniciarListenersConfigEnVivo() {
-            if (listenersConfigActivos) return;
-            listenersConfigActivos = true;
-
-            onValue(ref(db, "config"), (snap) => {
-                const val = snap.exists() ? snap.val() : null;
-                const usd = parseNumero(val?.tasaBcv) || 919.82;
-                const eur = parseNumero(val?.tasaEuroBcv) || 1011.18;
-                const usdt = parseNumero(val?.tasaUsdt) || 1076.91;
-
-                document.getElementById("actualUsd").textContent = "Bs. " + fmtDisplay(usd);
-                document.getElementById("actualEur").textContent = "Bs. " + fmtDisplay(eur);
-                document.getElementById("actualUsdt").textContent = "Bs. " + fmtDisplay(usdt);
-
-                const inpUsd = document.getElementById("inputTasaBcv");
-                const inpEur = document.getElementById("inputTasaEuroBcv");
-                const inpUsdt = document.getElementById("inputTasaUsdt");
-
-                if (inpUsd && document.activeElement !== inpUsd) inpUsd.value = usd.toFixed(2);
-                if (inpEur && document.activeElement !== inpEur) inpEur.value = eur.toFixed(2);
-                if (inpUsdt && document.activeElement !== inpUsdt) inpUsdt.value = usdt.toFixed(2);
-            });
+        function redondearTasa(num) {
+            return Math.round(num * 10000) / 10000;
         }
 
-        function mostrarPanelDesbloqueado() {
-            document.getElementById("bloqueoAcceso")?.classList.add("hidden");
-            document.getElementById("panelAdminContenido")?.classList.remove("hidden");
-            const fechaInput = document.getElementById("inputFechaHistorial");
-            const fechaNuevaHist = document.getElementById("inputNuevaFechaHist");
-            const hoyIso = obtenerFechaHoyISO();
-            if (fechaInput && !fechaInput.value) fechaInput.value = hoyIso;
-            if (fechaNuevaHist && !fechaNuevaHist.value) fechaNuevaHist.value = hoyIso;
-            aplicarVistaPorRuta(window.location.pathname, false);
-            iniciarListenersConfigEnVivo();
-            window.cargarHistorialAdmin(monedaHistorialActual);
+        function obtenerFechaLocalISO() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
 
-        window.desbloquearPanel = function(e) {
-            e.preventDefault();
-            const clave = (document.getElementById("claveAccesoInput")?.value || "").trim();
-            if (clave !== CLAVE_PANEL_LOCAL) {
-                mostrarAviso("Clave incorrecta", true);
-                return;
+        function setEstadoConexion(estado) {
+            const badge = document.getElementById('dbStatusBadge');
+            if (!badge) return;
+            if (estado === 'live') {
+                badge.className = 'inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-700 dark:text-emerald-300 text-[10px] font-mono font-bold';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span>LIVE</span>';
+            } else if (estado === 'error') {
+                badge.className = 'inline-flex items-center gap-1 px-2 py-1 rounded-full bg-rose-500/15 border border-rose-400/40 text-rose-700 dark:text-rose-300 text-[10px] font-mono font-bold';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span><span>ERROR</span>';
+            } else {
+                badge.className = 'inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/15 border border-amber-400/40 text-amber-700 dark:text-amber-300 text-[10px] font-mono font-bold';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span><span>SYNC</span>';
             }
-            try {
-                sessionStorage.setItem(STORAGE_DESBLOQUEO, "1");
-            } catch (err) {}
-            mostrarPanelDesbloqueado();
-            mostrarAviso("Panel desbloqueado");
+        }
+
+        window.toggleDarkAdmin = function() {
+            const html = document.documentElement;
+            const esOscuro = html.classList.toggle('dark');
+            localStorage.setItem('yimmi_kambio_admin_theme', esOscuro ? 'dark' : 'light');
+            actualizarIconoDark();
         };
 
-        window.guardarTasasFirebase = async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById("btnGuardarTasas");
-            const usd = parseNumero(document.getElementById("inputTasaBcv")?.value);
-            const eur = parseNumero(document.getElementById("inputTasaEuroBcv")?.value);
-            const usdt = parseNumero(document.getElementById("inputTasaUsdt")?.value);
-            const guardarHist = Boolean(document.getElementById("chkGuardarHistorial")?.checked);
-            const fechaHist = normalizarClaveFechaISO(document.getElementById("inputFechaHistorial")?.value) || obtenerFechaHoyISO();
+        function actualizarIconoDark() {
+            const icon = document.getElementById('iconDarkAdmin');
+            const esOscuro = document.documentElement.classList.contains('dark');
+            if (icon) {
+                icon.className = esOscuro
+                    ? 'fa-solid fa-sun text-amber-300'
+                    : 'fa-solid fa-moon text-purple-600';
+            }
+        }
 
-            if ([usd, eur, usdt].some(n => isNaN(n) || n <= 0)) {
-                mostrarAviso("Verifica que todas las tasas sean mayores a 0", true);
+        window.cargarValoresActualesEnInputs = function(forzar = true) {
+            const bcvEl = document.getElementById('inputTasaBcv');
+            const eurEl = document.getElementById('inputTasaEur');
+            const usdtEl = document.getElementById('inputTasaUsdt');
+
+            if (bcvEl && (forzar || document.activeElement !== bcvEl)) {
+                bcvEl.value = String(redondearTasa(ultimasTasas.tasaBcv));
+            }
+            if (eurEl && (forzar || document.activeElement !== eurEl)) {
+                eurEl.value = String(redondearTasa(ultimasTasas.tasaEuroBcv));
+            }
+            if (usdtEl && (forzar || document.activeElement !== usdtEl)) {
+                usdtEl.value = String(redondearTasa(ultimasTasas.tasaUsdt));
+            }
+        };
+
+        window.guardarTasasEnFirebase = async function(event) {
+            event.preventDefault();
+            const bcv = parseNum(document.getElementById('inputTasaBcv')?.value);
+            const eur = parseNum(document.getElementById('inputTasaEur')?.value);
+            const usdt = parseNum(document.getElementById('inputTasaUsdt')?.value);
+            const fechaHist = (document.getElementById('inputFechaHistorial')?.value || obtenerFechaLocalISO()).trim();
+            const guardarHist = Boolean(document.getElementById('chkGuardarHistorial')?.checked);
+
+            if (!Number.isFinite(bcv) || bcv <= 0 || !Number.isFinite(eur) || eur <= 0 || !Number.isFinite(usdt) || usdt <= 0) {
+                mostrarToast('Ingresa valores numéricos mayores a 0 en todas las tasas.', false);
                 return;
             }
+
+            const btn = document.getElementById('btnGuardarTasas');
+            const btnIcon = document.getElementById('btnGuardarIcon');
+            const btnTexto = document.getElementById('btnGuardarTexto');
 
             if (btn) btn.disabled = true;
+            if (btnIcon) btnIcon.className = 'fa-solid fa-spinner fa-spin';
+            if (btnTexto) btnTexto.textContent = 'Publicando...';
+
             try {
                 const ahoraIso = new Date().toISOString();
-                await update(ref(db, "config"), {
-                    tasaBcv: Number(usd.toFixed(2)),
-                    tasaEuroBcv: Number(eur.toFixed(2)),
-                    tasaUsdt: Number(usdt.toFixed(2)),
-                    fechaActualizacion: fechaHist,
-                    actualizadoEn: ahoraIso
+                const valBcv = redondearTasa(bcv);
+                const valEur = redondearTasa(eur);
+                const valUsdt = redondearTasa(usdt);
+
+                await update(ref(db, 'config'), {
+                    tasaBcv: valBcv,
+                    tasaEuroBcv: valEur,
+                    tasaUsdt: valUsdt,
+                    actualizadoManualEn: ahoraIso
                 });
 
                 if (guardarHist && fechaHist) {
                     await Promise.all([
-                        set(ref(db, `historialTasas/usd/${fechaHist}`), Number(usd.toFixed(2))),
-                        set(ref(db, `historialTasas/eur/${fechaHist}`), Number(eur.toFixed(2))),
-                        set(ref(db, `historialTasas/usdt/${fechaHist}`), Number(usdt.toFixed(2)))
+                        set(ref(db, `historialTasas/usd/${fechaHist}`), {
+                            fecha: fechaHist,
+                            valor: valBcv
+                        }),
+                        set(ref(db, `historialTasas/eur/${fechaHist}`), {
+                            fecha: fechaHist,
+                            valor: valEur
+                        }),
+                        set(ref(db, `historialTasas/usdt/${fechaHist}`), {
+                            fecha: fechaHist,
+                            valor: valUsdt
+                        })
                     ]);
-                    await marcarSincronizacionHistorial(monedaHistorialActual);
                 }
 
-                mostrarAviso("Tasas publicadas");
+                mostrarToast('Tasas publicadas en yimmi-kambio-v2', true);
             } catch (err) {
-                mostrarAviso("Error al guardar tasas", true);
+                console.error(err);
+                setEstadoConexion('error');
+                mostrarToast('Error al guardar en Firebase: ' + (err?.message || 'revisa conexión/reglas'), false);
             } finally {
                 if (btn) btn.disabled = false;
+                if (btnIcon) btnIcon.className = 'fa-solid fa-cloud-arrow-up';
+                if (btnTexto) btnTexto.textContent = 'Publicar Tasas en yimmi-kambio-v2';
             }
         };
 
-        function ocultarSplashAdmin() {
-            const sp = document.getElementById("adminSplash");
-            if (!sp) return;
-            setTimeout(() => {
-                sp.classList.add("hide");
-                setTimeout(() => sp.remove(), 350);
-            }, 850);
-        }
+        onValue(ref(db, 'config'), (snap) => {
+            setEstadoConexion('live');
 
-        window.addEventListener("DOMContentLoaded", () => {
-            aplicarVistaPorRuta(window.location.pathname, false);
-            try {
-                if (sessionStorage.getItem(STORAGE_DESBLOQUEO) === "1") {
-                    mostrarPanelDesbloqueado();
+            if (!snap.exists()) return;
+            const val = snap.val();
+            if (!val || typeof val !== 'object') return;
+
+            const bcv = Number(val.tasaBcv);
+            const eur = Number(val.tasaEuroBcv);
+            const usdt = Number(val.tasaUsdt);
+
+            if (Number.isFinite(bcv) && bcv > 0) ultimasTasas.tasaBcv = bcv;
+            if (Number.isFinite(eur) && eur > 0) ultimasTasas.tasaEuroBcv = eur;
+            if (Number.isFinite(usdt) && usdt > 0) ultimasTasas.tasaUsdt = usdt;
+
+            const elBcv = document.getElementById('liveTasaBcv');
+            const elEur = document.getElementById('liveTasaEur');
+            const elUsdt = document.getElementById('liveTasaUsdt');
+            const elSync = document.getElementById('adminLastSync');
+            const elP2p = document.getElementById('p2pDetalleTexto');
+
+            if (elBcv) elBcv.textContent = formatComa(ultimasTasas.tasaBcv);
+            if (elEur) elEur.textContent = formatComa(ultimasTasas.tasaEuroBcv);
+            if (elUsdt) elUsdt.textContent = formatComa(ultimasTasas.tasaUsdt);
+            if (elSync) {
+                elSync.textContent = new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+            }
+
+            if (elP2p) {
+                const compra = Number(val.usdtCompra);
+                const venta = Number(val.usdtVenta);
+                if (Number.isFinite(compra) || Number.isFinite(venta)) {
+                    const txtCompra = Number.isFinite(compra) ? `Compra ${formatComa(compra)}` : '';
+                    const txtVenta = Number.isFinite(venta) ? `Venta ${formatComa(venta)}` : '';
+                    elP2p.textContent = [txtCompra, txtVenta].filter(Boolean).join(' · ');
+                } else {
+                    elP2p.textContent = 'Esperando ciclo P2P en config';
                 }
-            } catch (err) {}
-            ocultarSplashAdmin();
+            }
+
+            const inputBcv = document.getElementById('inputTasaBcv');
+            const inputEur = document.getElementById('inputTasaEur');
+            const inputUsdt = document.getElementById('inputTasaUsdt');
+            if (inputBcv && !inputBcv.value) inputBcv.value = String(redondearTasa(ultimasTasas.tasaBcv));
+            if (inputEur && !inputEur.value) inputEur.value = String(redondearTasa(ultimasTasas.tasaEuroBcv));
+            if (inputUsdt && !inputUsdt.value) inputUsdt.value = String(redondearTasa(ultimasTasas.tasaUsdt));
+        }, () => {
+            setEstadoConexion('error');
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const temaGuardado = localStorage.getItem('yimmi_kambio_admin_theme');
+            if (temaGuardado === 'light') {
+                document.documentElement.classList.remove('dark');
+            } else {
+                document.documentElement.classList.add('dark');
+            }
+            actualizarIconoDark();
+
+            const fechaInput = document.getElementById('inputFechaHistorial');
+            if (fechaInput && !fechaInput.value) {
+                fechaInput.value = obtenerFechaLocalISO();
+            }
+            cargarValoresActualesEnInputs(true);
         });
     </script>
 </body>
